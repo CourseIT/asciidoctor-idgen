@@ -3,8 +3,10 @@ package com.amphiphile;
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.ast.Document;
+import org.asciidoctor.ast.ListItem;
 import org.asciidoctor.ast.StructuralNode;
 import org.asciidoctor.ast.impl.BlockImpl;
+import org.asciidoctor.ast.impl.ListImpl;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,9 +15,7 @@ import java.util.Map;
 
 public class Main {
 
-    static String adoc_file_path = "G:\\jprojects\\elibrary\\GLPS\\index.adoc";
-
-    public static ArrayList<ExtendedBlock> unidentifiedBlocks = new ArrayList<>();
+    private static ArrayList<ExtendedBlock> unidentifiedBlocks = new ArrayList<>();
 
     public static void main(String[] args) {
 
@@ -23,17 +23,21 @@ public class Main {
         Map<String, Object> options = OptionsBuilder.options().option("sourcemap", "true")
                 .asMap();
 
+        String adoc_file_path = System.getProperty("input", "G:\\jprojects\\elibrary\\Prikaz514n\\index.adoc");
+
         Document document = asciidoctor.loadFile(new File(adoc_file_path), options);
 
-
         touch(document);
+
+
+        System.out.printf("Unidentified blocks: %d%n", unidentifiedBlocks.size());
 
         System.out.println("ycnex!");
 
     }
 
 
-    public static void touch(StructuralNode block) {
+    private static void touch(StructuralNode block) {
 
         checkBlockId(block);
 
@@ -42,38 +46,78 @@ public class Main {
             for (StructuralNode abstractBlock : block.getBlocks()) {
                 touch(abstractBlock);
             }
+
         }
 
     }
 
-    public static void checkBlockId(StructuralNode block) {
+    private static void checkBlockId(StructuralNode block) {
 
-        if (!block.getContext().equals("document")) {
-
+        if (!(block.getContext().equals("document") ||
+                block.getContext().equals("preamble"))) {
 
             if (block.getId() == null) {
-
                 addUnidentifiedBlock(block);
-
+            } else {
+                checkNestedItemsId(block);
             }
         }
+
     }
 
-    public static void addUnidentifiedBlock(StructuralNode unidentifiedBlock) {
+    private static void addUnidentifiedBlock(StructuralNode unidentifiedBlock) {
         ExtendedBlock extendedBlock = new ExtendedBlock();
         extendedBlock.id = unidentifiedBlock.getId();
         extendedBlock.context = unidentifiedBlock.getContext();
-        extendedBlock.sourceLine = unidentifiedBlock.getSourceLocation().getLineNumber();
-        if (extendedBlock.context.equals("paragraph")) {
-            extendedBlock.sourceText = ((BlockImpl) unidentifiedBlock).getSource();
-        } else if (extendedBlock.context.equals("section")) {
-            extendedBlock.title = unidentifiedBlock.getTitle();
+        if (unidentifiedBlock.getSourceLocation() != null) {
+            extendedBlock.sourceLine = unidentifiedBlock.getSourceLocation().getLineNumber();
+        }
+        switch (extendedBlock.context) {
+            case "image":
+                extendedBlock.target = (String) unidentifiedBlock.getAttributes().get("target");
+                break;
+            case "paragraph":
+                extendedBlock.sourceText = ((BlockImpl) unidentifiedBlock).getSource();
+                break;
+            case "table"://TODO: don't forget me
+                break;
+
         }
 
+        unidentifiedBlocks.add(extendedBlock);
+
+        checkNestedItemsId(unidentifiedBlock);
+
+
+    }
+
+    private static void checkNestedItemsId(StructuralNode block) {
+        if (block.getContext().endsWith("list")) {
+
+            for (Object listItem : ((ListImpl) block).getItems()) {
+//                FIXME: фильтровать с Id == null
+                addListItem((ListItem) listItem);
+            }
+        } else if (block.getContext().equals("table")) {
+            // TODO: table
+            System.out.println("TODO");
+        }
+    }
+
+
+    private static void addListItem(ListItem listItem) {
+        ExtendedBlock extendedBlock = new ExtendedBlock();
+
+        extendedBlock.id = listItem.getId(); // FIXME: Так не работает, надо разбирать строку
+        extendedBlock.context = listItem.getContext();
+        if (listItem.getSourceLocation() != null) {
+            extendedBlock.sourceLine = listItem.getSourceLocation().getLineNumber();
+        } else {
+            extendedBlock.marker = listItem.getMarker();
+        }
+        extendedBlock.sourceText = listItem.getSource();
 
         unidentifiedBlocks.add(extendedBlock);
 
     }
-
-
 }

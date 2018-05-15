@@ -1,11 +1,13 @@
 package com.amphiphile;
 
-public class ExtendedBlock {
+class ExtendedBlock {
 
-    public String id; //идентификатор
-    public String context; // тип элемента: раздел, абзац, список и т.д.
-    public int sourceLine; //строка, на которой находится элемент в исходном документе
-    public String sourceText; // текстовое содержимое элемента
-    public String title; // заголовок
+    String id; //идентификатор
+    String context; // тип элемента: раздел, абзац, список и т.д.
+    int sourceLine; //строка, на которой находится элемент в исходном документе
+    String sourceText; // текстовое содержимое элемента
+    String marker; // маркер списка (для определения положения элемента в документе в отсутствии номера строки
+    String title; // заголовок
+    String target; // ссылка на изображение (для img)
 
 }
