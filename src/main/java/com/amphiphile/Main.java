@@ -79,7 +79,6 @@ public class Main {
                 break;
             case "paragraph":
                 extendedBlock.sourceText = ((BlockImpl) block).getSource();
-                checkFootnotes(extendedBlock.sourceText);
                 break;
             case "table"://TODO: don't forget me
                 break;
@@ -125,8 +124,6 @@ public class Main {
         }
         extendedBlock.sourceText = listItem.getSource();
 
-        checkFootnotes(extendedBlock.sourceText);
-
 //        if (!(extendedBlock.context.equals("section") ||
 //                extendedBlock.context.endsWith("list") ||
 //                extendedBlock.context.equals("table"))) {
@@ -151,27 +148,4 @@ public class Main {
         } else
             return null;
     }
-
-    private static void checkFootnotes(String sourceText) {
-
-        if (sourceText.contains("footnote")) {//TODO: убрать условие
-
-            Pattern InlineFootnoteMacroRx = Pattern.compile(".*\\\\?(footnote(?:ref)?):\\[(.*?[^\\\\])].*", Pattern.MULTILINE);
-            Matcher m = InlineFootnoteMacroRx.matcher(sourceText);
-
-            if (m.matches()) {
-                if (m.group(1).equals("footnote")) {
-                    System.out.println("footnote");
-                    String footnoteId = null;
-                    String footnoteText = m.group(2);
-                } else {
-                    System.out.println("footnoteref");
-                }
-
-            }
-        }
-    }
-
-
-//TODO: add footnote as block
 }
