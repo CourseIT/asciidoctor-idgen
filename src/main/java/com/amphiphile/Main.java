@@ -127,7 +127,7 @@ public class Main {
     private static void addListItem(ListItem listItem) {
         ExtendedBlock extendedBlock = new ExtendedBlock();
 
-        extendedBlock.id = getListItemId(listItem);
+        extendedBlock.id = getInlineId(listItem.getSource());
 
         extendedBlock.context = listItem.getContext();
         if (listItem.getSourceLocation() != null) {
@@ -149,9 +149,9 @@ public class Main {
 
     }
 
-    private static String getListItemId(ListItem listItem) {
+    private static String getInlineId(String sourceText) {
         Pattern InlineAnchorRx = Pattern.compile("(?:\\\\)?(?:\\[\\[([\\p{Alpha}_:][\\w:.-]*)(?:, *(.+?))?]]|anchor:([\\p{Alpha}_:][\\w:.-]*)\\[(?:]|(.*?[^\\\\])])).*");
-        Matcher m = InlineAnchorRx.matcher(listItem.getSource());
+        Matcher m = InlineAnchorRx.matcher(sourceText);
         if (m.matches()) {
             if (m.group(1) != null) {
                 return m.group(1);
@@ -170,7 +170,24 @@ public class Main {
     }
 
     private static void addCellItem(Cell cell) {
-        System.out.println("cell");
-        //TODO: parse cell contents
+        Object style = cell.getAttributes().get("style");
+
+        if (style != null) {
+
+            if (style.toString().equals("asciidoc")) {
+                System.out.println("adoc");
+                //TODO: parse and touch
+            }
+        } else {
+            ExtendedBlock extendedBlock = new ExtendedBlock();
+
+            extendedBlock.id = getInlineId(cell.getSource());
+            extendedBlock.context = cell.getContext();
+            extendedBlock.sourceText = cell.getSource();
+            allBlocks.add(extendedBlock);
+            if (extendedBlock.id == null) {
+                unidentifiedBlocks.add(extendedBlock);
+            }
+        }
     }
 }
