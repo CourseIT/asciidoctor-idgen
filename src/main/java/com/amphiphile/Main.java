@@ -18,24 +18,21 @@ public class Main {
 
     private static ArrayList<ExtendedBlock> allBlocks = new ArrayList<>();
     private static ArrayList<ExtendedBlock> unidentifiedBlocks = new ArrayList<>();
+    private static Map<String, Object> options = OptionsBuilder.options().option("sourcemap", "true")
+            .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 2)
+            .asMap();
 
     public static void main(String[] args) {
 
         Asciidoctor asciidoctor = Asciidoctor.Factory.create();
-        Map<String, Object> options = OptionsBuilder.options().option("sourcemap", "true")
-                .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 2)
-                .asMap();
 
         String adoc_file_path = System.getProperty("input", "G:\\jprojects\\elibrary\\Prikaz514n\\index.adoc");
-
         Document document = asciidoctor.loadFile(new File(adoc_file_path), options);
-
         touch(document);
 
 
         System.out.printf("Unidentified blocks: %d%n", unidentifiedBlocks.size());
         System.out.printf("All blocks: %d%n", allBlocks.size());
-
         System.out.println("ycnex!");
 
     }
@@ -175,8 +172,9 @@ public class Main {
         if (style != null) {
 
             if (style.toString().equals("asciidoc")) {
-                System.out.println("adoc");
-                //TODO: parse and touch
+                Asciidoctor asciidoctor = Asciidoctor.Factory.create();
+                Document document = asciidoctor.load(cell.getSource(), options);
+                touch(document);
             }
         } else {
             ExtendedBlock extendedBlock = new ExtendedBlock();
