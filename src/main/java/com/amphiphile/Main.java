@@ -2,11 +2,10 @@ package com.amphiphile;
 
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.OptionsBuilder;
-import org.asciidoctor.ast.Document;
-import org.asciidoctor.ast.ListItem;
-import org.asciidoctor.ast.StructuralNode;
+import org.asciidoctor.ast.*;
 import org.asciidoctor.ast.impl.BlockImpl;
 import org.asciidoctor.ast.impl.ListImpl;
+import org.asciidoctor.ast.impl.TableImpl;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,6 +23,7 @@ public class Main {
 
         Asciidoctor asciidoctor = Asciidoctor.Factory.create();
         Map<String, Object> options = OptionsBuilder.options().option("sourcemap", "true")
+                .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 2)
                 .asMap();
 
         String adoc_file_path = System.getProperty("input", "G:\\jprojects\\elibrary\\Prikaz514n\\index.adoc");
@@ -34,6 +34,7 @@ public class Main {
 
 
         System.out.printf("Unidentified blocks: %d%n", unidentifiedBlocks.size());
+        System.out.printf("All blocks: %d%n", allBlocks.size());
 
         System.out.println("ycnex!");
 
@@ -42,8 +43,12 @@ public class Main {
 
     private static void touch(StructuralNode block) {
 
-        checkBlockId(block);
 
+        if (!(block.getContext().equals("document") ||
+                block.getContext().equals("preamble"))) {
+
+            addBlock(block);
+        }
 
         if (block.getBlocks() != null) {
             for (StructuralNode abstractBlock : block.getBlocks()) {
@@ -54,22 +59,12 @@ public class Main {
 
     }
 
-    private static void checkBlockId(StructuralNode block) {
-
-        if (!(block.getContext().equals("document") ||
-                block.getContext().equals("preamble"))) {
-
-            addBlock(block);
-            checkNestedItems(block);
-        }
-
-    }
-
     private static void addBlock(StructuralNode block) {
         ExtendedBlock extendedBlock = new ExtendedBlock();
 
         extendedBlock.id = block.getId();
         extendedBlock.context = block.getContext();
+        extendedBlock.style = (String) block.getAttributes().get("style");
         if (block.getSourceLocation() != null) {
             extendedBlock.sourceLine = block.getSourceLocation().getLineNumber();
         }
@@ -80,9 +75,9 @@ public class Main {
             case "paragraph":
                 extendedBlock.sourceText = ((BlockImpl) block).getSource();
                 break;
-            case "table"://TODO: don't forget me
+            case "table":
+                extendedBlock.title = block.getTitle();
                 break;
-
         }
 //        if (!(extendedBlock.context.equals("section") ||
 //                extendedBlock.context.endsWith("list") ||
@@ -107,7 +102,25 @@ public class Main {
 
             }
         } else if (block.getContext().equals("table")) {
-            // TODO: table
+
+
+            Table table = (TableImpl) block;
+
+            for (Row header : table.getHeader()) {
+                checkRows(header);
+
+            }
+
+            for (Row footer : table.getFooter()) {
+                checkRows(footer);
+
+            }
+
+            for (Row body : table.getBody()) {
+                checkRows(body);
+
+            }
+
         }
     }
 
@@ -147,5 +160,17 @@ public class Main {
             }
         } else
             return null;
+    }
+
+    private static void checkRows(Row row) {
+        for (Cell cell : row.getCells()) {
+            addCellItem(cell);
+
+        }
+    }
+
+    private static void addCellItem(Cell cell) {
+        System.out.println("cell");
+        //TODO: parse cell contents
     }
 }

@@ -9,5 +9,6 @@ class ExtendedBlock {
     String marker; // маркер списка (для определения положения элемента в документе в отсутствии номера строки
     String title; // заголовок
     String target; // ссылка на изображение (для img)
+    String style;
 
 }
