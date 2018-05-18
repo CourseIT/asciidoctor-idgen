@@ -2,8 +2,10 @@ package com.amphiphile;
 
 class ExtendedBlock {
 
-    public Boolean isIdentified; //идентификатор уже существует в документе
+    Boolean isIdentified; //идентификатор уже существует в документе
     String id; //идентификатор
+    String parentId;//идентификатор родительского элемента (для списков, таблиц)
+    Boolean isEmbeddedDoc; //находится в документе, встроенном в исходный (asciidoc-ячейка)
     String context; // тип элемента: раздел, абзац, список и т.д.
     int sourceLine; //строка, на которой находится элемент в исходном документе
     String sourceText; // текстовое содержимое элемента
@@ -14,6 +16,7 @@ class ExtendedBlock {
 
     ExtendedBlock() {
         isIdentified = false;
+        isEmbeddedDoc = false;
     }
 
 }
