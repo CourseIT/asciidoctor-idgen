@@ -63,9 +63,9 @@ public class Main {
             extendedBlock.isIdentified = true;
         } else {
             IdGenerator idGenerator = new IdGenerator();
-            extendedBlock.id = String.join("_",extendedBlock.context, idGenerator.generateId(4));
+            extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(4));
         }
-
+        extendedBlock.id = extendedBlock.id.toLowerCase();
         extendedBlock.style = (String) block.getAttributes().get("style");
         if (block.getSourceLocation() != null) {
             extendedBlock.sourceLine = block.getSourceLocation().getLineNumber();
@@ -134,6 +134,7 @@ public class Main {
             IdGenerator idGenerator = new IdGenerator();
             extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(4));
         }
+        extendedBlock.id = extendedBlock.id.toLowerCase();
 
         if (listItem.getSourceLocation() != null) {
             extendedBlock.sourceLine = listItem.getSourceLocation().getLineNumber();
@@ -189,8 +190,9 @@ public class Main {
                 extendedBlock.isIdentified = true;
             } else {
                 IdGenerator idGenerator = new IdGenerator();
-                extendedBlock.id = String.join("_",extendedBlock.context,idGenerator.generateId(4));
+                extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(4));
             }
+            extendedBlock.id = extendedBlock.id.toLowerCase();
             extendedBlock.sourceText = cell.getSource();
             allBlocks.add(extendedBlock);
         }
