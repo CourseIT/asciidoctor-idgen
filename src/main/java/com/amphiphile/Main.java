@@ -1,5 +1,6 @@
 package com.amphiphile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Main {
@@ -13,9 +14,12 @@ public class Main {
 
         System.out.printf("All blocks: %d%n", allBlocks.size());
 
-        Extender extender = new Extender();
-        extender.extend(adoc_file_path, allBlocks);
-
+        try {
+            Extender extender = new Extender();
+            extender.extend(adoc_file_path, allBlocks);
+        }catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
 
 
         System.out.println("ycnex!");
