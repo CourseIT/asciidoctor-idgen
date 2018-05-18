@@ -2,6 +2,7 @@ package com.amphiphile;
 
 class ExtendedBlock {
 
+    public Boolean isIdentified; //идентификатор уже существует в документе
     String id; //идентификатор
     String context; // тип элемента: раздел, абзац, список и т.д.
     int sourceLine; //строка, на которой находится элемент в исходном документе
@@ -10,5 +11,9 @@ class ExtendedBlock {
     String title; // заголовок
     String target; // ссылка на изображение (для img)
     String style;
+
+    ExtendedBlock() {
+        isIdentified = false;
+    }
 
 }

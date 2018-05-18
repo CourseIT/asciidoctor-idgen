@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
 public class Main {
 
     private static ArrayList<ExtendedBlock> allBlocks = new ArrayList<>();
-    private static ArrayList<ExtendedBlock> unidentifiedBlocks = new ArrayList<>();
     private static Map<String, Object> options = OptionsBuilder.options().option("sourcemap", "true")
             .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 2)
             .asMap();
@@ -30,8 +29,6 @@ public class Main {
         Document document = asciidoctor.loadFile(new File(adoc_file_path), options);
         touch(document);
 
-
-        System.out.printf("Unidentified blocks: %d%n", unidentifiedBlocks.size());
         System.out.printf("All blocks: %d%n", allBlocks.size());
         System.out.println("ycnex!");
 
@@ -59,8 +56,16 @@ public class Main {
     private static void addBlock(StructuralNode block) {
         ExtendedBlock extendedBlock = new ExtendedBlock();
 
-        extendedBlock.id = block.getId();
         extendedBlock.context = block.getContext();
+        extendedBlock.id = block.getId();
+
+        if (extendedBlock.id != null) {
+            extendedBlock.isIdentified = true;
+        } else {
+            IdGenerator idGenerator = new IdGenerator();
+            extendedBlock.id = String.join("_",extendedBlock.context, idGenerator.generateId(4));
+        }
+
         extendedBlock.style = (String) block.getAttributes().get("style");
         if (block.getSourceLocation() != null) {
             extendedBlock.sourceLine = block.getSourceLocation().getLineNumber();
@@ -78,9 +83,6 @@ public class Main {
         }
         if (!(extendedBlock.context.endsWith("list"))) {
             allBlocks.add(extendedBlock);
-        }
-        if (extendedBlock.id == null) {
-            unidentifiedBlocks.add(extendedBlock);
         }
 
         checkNestedItems(block);
@@ -122,9 +124,17 @@ public class Main {
     private static void addListItem(ListItem listItem) {
         ExtendedBlock extendedBlock = new ExtendedBlock();
 
-        extendedBlock.id = getInlineId(listItem.getSource());
 
         extendedBlock.context = listItem.getContext();
+        extendedBlock.id = getInlineId(listItem.getSource());
+
+        if (extendedBlock.id != null) {
+            extendedBlock.isIdentified = true;
+        } else {
+            IdGenerator idGenerator = new IdGenerator();
+            extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(4));
+        }
+
         if (listItem.getSourceLocation() != null) {
             extendedBlock.sourceLine = listItem.getSourceLocation().getLineNumber();
         } else {
@@ -133,9 +143,6 @@ public class Main {
         extendedBlock.sourceText = listItem.getSource();
 
         allBlocks.add(extendedBlock);
-        if (extendedBlock.id == null) {
-            unidentifiedBlocks.add(extendedBlock);
-        }
 
 
     }
@@ -174,13 +181,18 @@ public class Main {
         } else {
             ExtendedBlock extendedBlock = new ExtendedBlock();
 
-            extendedBlock.id = getInlineId(cell.getSource());
+
             extendedBlock.context = cell.getContext();
+            extendedBlock.id = getInlineId(cell.getSource());
+
+            if (extendedBlock.id != null) {
+                extendedBlock.isIdentified = true;
+            } else {
+                IdGenerator idGenerator = new IdGenerator();
+                extendedBlock.id = String.join("_",extendedBlock.context,idGenerator.generateId(4));
+            }
             extendedBlock.sourceText = cell.getSource();
             allBlocks.add(extendedBlock);
-            if (extendedBlock.id == null) {
-                unidentifiedBlocks.add(extendedBlock);
-            }
         }
     }
 }
