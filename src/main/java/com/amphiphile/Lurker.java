@@ -9,7 +9,6 @@ import org.asciidoctor.ast.impl.TableImpl;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,25 +16,25 @@ import java.util.regex.Pattern;
 class Lurker {
     private static ArrayList<ExtendedBlock> allBlocks = new ArrayList<>();
 
-    private static void touch(StructuralNode block, Boolean isEmbeddedDoc) {
+    private static void touch(StructuralNode block) {
 
 
         if (!(block.getContext().equals("document") ||
                 block.getContext().equals("preamble"))) {
 
-            addBlock(block, isEmbeddedDoc);
+            addBlock(block);
         }
 
         if (block.getBlocks() != null) {
             for (StructuralNode abstractBlock : block.getBlocks()) {
-                touch(abstractBlock, isEmbeddedDoc);
+                touch(abstractBlock);
             }
 
         }
 
     }
 
-    private static void addBlock(StructuralNode block, Boolean isEmbeddedDoc) {
+    private static void addBlock(StructuralNode block) {
         ExtendedBlock extendedBlock = new ExtendedBlock();
 
         extendedBlock.context = block.getContext();
@@ -48,7 +47,6 @@ class Lurker {
             extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(4));
         }
         extendedBlock.id = extendedBlock.id.toLowerCase();
-        extendedBlock.isEmbeddedDoc = isEmbeddedDoc;
         extendedBlock.style = (String) block.getAttributes().get("style");
         if (block.getSourceLocation() != null) {
             extendedBlock.sourceLine = block.getSourceLocation().getLineNumber();
@@ -63,28 +61,22 @@ class Lurker {
             case "table":
                 extendedBlock.title = block.getTitle();
                 break;
-            case "section":
-                extendedBlock.title = block.getTitle();
-                break;
+        }
+        if (!(extendedBlock.context.endsWith("list"))) {
+            allBlocks.add(extendedBlock);
         }
 
-        allBlocks.add(extendedBlock);
+        checkNestedItems(block);
 
-        Map<String, String> blockParams = new HashMap<>();
-        blockParams.put("id", extendedBlock.id);
-        blockParams.put("style", extendedBlock.style);
-        blockParams.put("isEmbeddedDoc", extendedBlock.isEmbeddedDoc.toString());
-
-        checkNestedItems(block, blockParams);
 
     }
 
-    private static void checkNestedItems(StructuralNode block, Map blockParams) {
+    private static void checkNestedItems(StructuralNode block) {
         if (block.getContext().endsWith("list")) {
 
             for (Object listItem : ((ListImpl) block).getItems()) {
 
-                addListItem((ListItem) listItem, blockParams);
+                addListItem((ListItem) listItem, block);
 
             }
         } else if (block.getContext().equals("table")) {
@@ -93,29 +85,29 @@ class Lurker {
             Table table = (TableImpl) block;
 
             for (Row header : table.getHeader()) {
-                checkRows(header, blockParams);
+                checkRows(header, table);
 
             }
 
             for (Row footer : table.getFooter()) {
-                checkRows(footer, blockParams);
+                checkRows(footer, table);
 
             }
 
             for (Row body : table.getBody()) {
-                checkRows(body, blockParams);
+                checkRows(body, table);
 
             }
 
         }
     }
 
-    private static void addListItem(ListItem listItem, Map listParams) {
+    private static void addListItem(ListItem listItem, StructuralNode parent) {
         ExtendedBlock extendedBlock = new ExtendedBlock();
 
 
         extendedBlock.context = listItem.getContext();
-        extendedBlock.id = getInlineId(listItem.getSource(), listParams);
+        extendedBlock.id = getInlineId(listItem.getSource(), parent);
 
         if (extendedBlock.id != null) {
             extendedBlock.isIdentified = true;
@@ -124,8 +116,7 @@ class Lurker {
             extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(4));
         }
         extendedBlock.id = extendedBlock.id.toLowerCase();
-        extendedBlock.parentId = listParams.get("id").toString();
-        extendedBlock.isEmbeddedDoc = Boolean.parseBoolean(listParams.get("isEmbeddedDoc").toString());
+
         if (listItem.getSourceLocation() != null) {
             extendedBlock.sourceLine = listItem.getSourceLocation().getLineNumber();
         } else {
@@ -138,11 +129,13 @@ class Lurker {
 
     }
 
-    private static String getInlineId(String sourceText, Map blockParams) {
+    private static String getInlineId(String sourceText, StructuralNode parent) {
 
         String result = null;
 
-        if (blockParams.get("style") != null && blockParams.get("style").toString().equals("bibliography")) {
+        String parentStyle = (String) parent.getAttributes().get("style");
+
+        if (parentStyle != null && parentStyle.equals("bibliography")) {
             Pattern InlineBiblioAnchorRx = Pattern.compile("^\\[\\[\\[([\\p{Alpha}_:][\\w:.-]*)(?:, *(.+?))?]]].*");
             Matcher m = InlineBiblioAnchorRx.matcher(sourceText);
             if (m.matches()) {
@@ -167,14 +160,14 @@ class Lurker {
         return result;
     }
 
-    private static void checkRows(Row row, Map tableParams) {
+    private static void checkRows(Row row, Table parent) {
         for (Cell cell : row.getCells()) {
-            addCellItem(cell, tableParams);
+            addCellItem(cell, parent);
 
         }
     }
 
-    private static void addCellItem(Cell cell, Map tableParams) {
+    private static void addCellItem(Cell cell, Table parent) {
         Object style = cell.getAttributes().get("style");
 
         if (style != null) {
@@ -186,13 +179,13 @@ class Lurker {
                         .asMap();
 
                 Document document = asciidoctor.load(cell.getSource(), options);
-                touch(document, true);
+                touch(document);
             }
         } else {
             ExtendedBlock extendedBlock = new ExtendedBlock();
 
             extendedBlock.context = cell.getContext();
-            extendedBlock.id = getInlineId(cell.getSource(), tableParams);
+            extendedBlock.id = getInlineId(cell.getSource(), parent);
 
             if (extendedBlock.id != null) {
                 extendedBlock.isIdentified = true;
@@ -201,8 +194,6 @@ class Lurker {
                 extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(4));
             }
             extendedBlock.id = extendedBlock.id.toLowerCase();
-            extendedBlock.parentId = tableParams.get("id").toString();
-            extendedBlock.isEmbeddedDoc = Boolean.parseBoolean(tableParams.get("isEmbeddedDoc").toString());
             extendedBlock.sourceText = cell.getSource();
             allBlocks.add(extendedBlock);
         }
@@ -216,8 +207,9 @@ class Lurker {
                 .asMap();
 
         Document document = asciidoctor.loadFile(new File(path), options);
-        touch(document, false);
+        touch(document);
         return allBlocks;
     }
+
 
 }
