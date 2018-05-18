@@ -12,6 +12,12 @@ public class Main {
         ArrayList<ExtendedBlock> allBlocks = lurker.lurk(adoc_file_path);
 
         System.out.printf("All blocks: %d%n", allBlocks.size());
+
+        Extender extender = new Extender();
+        extender.extend(adoc_file_path, allBlocks);
+
+
+
         System.out.println("ycnex!");
 
     }
