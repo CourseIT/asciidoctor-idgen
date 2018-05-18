@@ -76,11 +76,9 @@ public class Main {
                 extendedBlock.title = block.getTitle();
                 break;
         }
-//        if (!(extendedBlock.context.equals("section") ||
-//                extendedBlock.context.endsWith("list") ||
-//                extendedBlock.context.equals("table"))) {
-        allBlocks.add(extendedBlock);
-//        }
+        if (!(extendedBlock.context.endsWith("list"))) {
+            allBlocks.add(extendedBlock);
+        }
         if (extendedBlock.id == null) {
             unidentifiedBlocks.add(extendedBlock);
         }
@@ -134,11 +132,7 @@ public class Main {
         }
         extendedBlock.sourceText = listItem.getSource();
 
-//        if (!(extendedBlock.context.equals("section") ||
-//                extendedBlock.context.endsWith("list") ||
-//                extendedBlock.context.equals("table"))) {
         allBlocks.add(extendedBlock);
-//        }
         if (extendedBlock.id == null) {
             unidentifiedBlocks.add(extendedBlock);
         }
@@ -147,6 +141,7 @@ public class Main {
     }
 
     private static String getInlineId(String sourceText) {
+        // TODO: получать идентификаторы библиографии
         Pattern InlineAnchorRx = Pattern.compile("(?:\\\\)?(?:\\[\\[([\\p{Alpha}_:][\\w:.-]*)(?:, *(.+?))?]]|anchor:([\\p{Alpha}_:][\\w:.-]*)\\[(?:]|(.*?[^\\\\])])).*");
         Matcher m = InlineAnchorRx.matcher(sourceText);
         if (m.matches()) {
