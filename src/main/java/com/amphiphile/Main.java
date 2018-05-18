@@ -95,7 +95,7 @@ public class Main {
 
             for (Object listItem : ((ListImpl) block).getItems()) {
 
-                addListItem((ListItem) listItem);
+                addListItem((ListItem) listItem, block);
 
             }
         } else if (block.getContext().equals("table")) {
@@ -104,29 +104,29 @@ public class Main {
             Table table = (TableImpl) block;
 
             for (Row header : table.getHeader()) {
-                checkRows(header);
+                checkRows(header, table);
 
             }
 
             for (Row footer : table.getFooter()) {
-                checkRows(footer);
+                checkRows(footer, table);
 
             }
 
             for (Row body : table.getBody()) {
-                checkRows(body);
+                checkRows(body, table);
 
             }
 
         }
     }
 
-    private static void addListItem(ListItem listItem) {
+    private static void addListItem(ListItem listItem, StructuralNode parent) {
         ExtendedBlock extendedBlock = new ExtendedBlock();
 
 
         extendedBlock.context = listItem.getContext();
-        extendedBlock.id = getInlineId(listItem.getSource());
+        extendedBlock.id = getInlineId(listItem.getSource(), parent);
 
         if (extendedBlock.id != null) {
             extendedBlock.isIdentified = true;
@@ -148,28 +148,44 @@ public class Main {
 
     }
 
-    private static String getInlineId(String sourceText) {
-        // TODO: получать идентификаторы библиографии
-        Pattern InlineAnchorRx = Pattern.compile("(?:\\\\)?(?:\\[\\[([\\p{Alpha}_:][\\w:.-]*)(?:, *(.+?))?]]|anchor:([\\p{Alpha}_:][\\w:.-]*)\\[(?:]|(.*?[^\\\\])])).*");
-        Matcher m = InlineAnchorRx.matcher(sourceText);
-        if (m.matches()) {
-            if (m.group(1) != null) {
-                return m.group(1);
-            } else {
-                return m.group(3);
+    private static String getInlineId(String sourceText, StructuralNode parent) {
+
+        String result = null;
+
+        String parentStyle = (String) parent.getAttributes().get("style");
+
+        if (parentStyle != null && parentStyle.equals("bibliography")) {
+            Pattern InlineBiblioAnchorRx = Pattern.compile("^\\[\\[\\[([\\p{Alpha}_:][\\w:.-]*)(?:, *(.+?))?]]].*");
+            Matcher m = InlineBiblioAnchorRx.matcher(sourceText);
+            if (m.matches()) {
+                result = m.group(1);
             }
-        } else
-            return null;
+
+        } else {
+
+            Pattern InlineAnchorRx = Pattern.compile("(?:\\\\)?(?:\\[\\[([\\p{Alpha}_:][\\w:.-]*)(?:, *(.+?))?]]|anchor:([\\p{Alpha}_:][\\w:.-]*)\\[(?:]|(.*?[^\\\\])])).*");
+            Matcher m = InlineAnchorRx.matcher(sourceText);
+            if (m.matches()) {
+                if (m.group(1) != null) {
+                    result = m.group(1);
+                } else {
+                    result = m.group(3);
+                }
+            }
+        }
+
+
+        return result;
     }
 
-    private static void checkRows(Row row) {
+    private static void checkRows(Row row, Table parent) {
         for (Cell cell : row.getCells()) {
-            addCellItem(cell);
+            addCellItem(cell, parent);
 
         }
     }
 
-    private static void addCellItem(Cell cell) {
+    private static void addCellItem(Cell cell, Table parent) {
         Object style = cell.getAttributes().get("style");
 
         if (style != null) {
@@ -182,9 +198,8 @@ public class Main {
         } else {
             ExtendedBlock extendedBlock = new ExtendedBlock();
 
-
             extendedBlock.context = cell.getContext();
-            extendedBlock.id = getInlineId(cell.getSource());
+            extendedBlock.id = getInlineId(cell.getSource(), parent);
 
             if (extendedBlock.id != null) {
                 extendedBlock.isIdentified = true;
