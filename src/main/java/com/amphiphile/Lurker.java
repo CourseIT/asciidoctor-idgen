@@ -16,6 +16,11 @@ import java.util.regex.Pattern;
 
 class Lurker {
     private static ArrayList<ExtendedBlock> allBlocks = new ArrayList<>();
+    private String path;
+
+    Lurker(String path) {
+        this.path = path;
+    }
 
     private static void touch(StructuralNode block, Boolean isEmbeddedDoc) {
 
@@ -217,7 +222,7 @@ class Lurker {
         }
     }
 
-    ArrayList<ExtendedBlock> lurk(String path) {
+    ArrayList<ExtendedBlock> lurk() {
         Asciidoctor asciidoctor = Asciidoctor.Factory.create();
 
         Map<String, Object> options = OptionsBuilder.options()
