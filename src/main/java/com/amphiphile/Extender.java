@@ -27,8 +27,10 @@ class Extender {
         bufferedReader.close();
 
 
-        for (ExtendedBlock extendedBlock : allTheBlocks) {
+        for (int idx = 0; idx < allTheBlocks.size(); idx++)
 
+        {
+            ExtendedBlock extendedBlock = allTheBlocks.get(idx);
 
             if (!extendedBlock.isIdentified && !extendedBlock.isEmbeddedDoc) {
                 System.out.println(extendedBlock.context);
@@ -36,10 +38,36 @@ class Extender {
                     lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
                     shift += 1;
                     extendedBlock.isIdentified = true;
-                }
-                else if (extendedBlock.context.equals("table")) {
+                } else if (extendedBlock.context.equals("image")) {
+                    lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
+                    shift += 1;
+                    extendedBlock.isIdentified = true;
+                } else if (extendedBlock.context.equals("table")) {
                     lines.add(extendedBlock.sourceLine + shift - 1 - 1, "[[" + extendedBlock.id + "]]");
                     shift += 1;
+                    extendedBlock.isIdentified = true;
+                } else if (extendedBlock.context.endsWith("list")) {
+
+                    if (!extendedBlock.style.equals("bibliography")) {
+                        lines.add(extendedBlock.sourceLine + shift - 1 - 1, "[[" + extendedBlock.id + "]]");
+                        shift += 1;
+                        extendedBlock.isIdentified = true;
+                    }
+                } else if (extendedBlock.context.contains("list_item")) {
+
+
+                    for (int line_idx = idx; line_idx < lines.size(); line_idx++) {
+                        String line = lines.get(line_idx);
+
+
+                        if (line.startsWith(String.format("%s %s", extendedBlock.marker, extendedBlock.sourceText.split("\\r?\\n")[0]))
+                                ) {
+                            lines.set(line_idx, String.format("%s [[%s]]%s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
+                            break;
+                        }
+                    }
+
+
                     extendedBlock.isIdentified = true;
                 }
             }

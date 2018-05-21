@@ -56,6 +56,7 @@ class Lurker {
         switch (extendedBlock.context) {
             case "image":
                 extendedBlock.target = (String) block.getAttributes().get("target");
+                extendedBlock.title = block.getTitle();
                 break;
             case "paragraph":
                 extendedBlock.sourceText = ((BlockImpl) block).getSource();
@@ -182,7 +183,7 @@ class Lurker {
             if (style.toString().equals("asciidoc")) {
                 Asciidoctor asciidoctor = Asciidoctor.Factory.create();
                 Map<String, Object> options = OptionsBuilder.options().option("sourcemap", "true")
-                        .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 2)
+                        .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 4)
                         .asMap();
 
                 Document document = asciidoctor.load(cell.getSource(), options);
@@ -212,7 +213,7 @@ class Lurker {
         Asciidoctor asciidoctor = Asciidoctor.Factory.create();
 
         Map<String, Object> options = OptionsBuilder.options().option("sourcemap", "true")
-                .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 2)
+                .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 4)
                 .asMap();
 
         Document document = asciidoctor.loadFile(new File(path), options);
