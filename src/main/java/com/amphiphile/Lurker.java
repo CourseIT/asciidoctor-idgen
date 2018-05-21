@@ -136,6 +136,12 @@ class Lurker {
 
         allBlocks.add(extendedBlock);
 
+        if (listItem.getBlocks().size() != 0) {
+            for (StructuralNode listBlock : listItem.getBlocks()) {
+                addBlock(listBlock, Boolean.parseBoolean(listParams.get("isEmbeddedDoc").toString()));
+            }
+        }
+
 
     }
 
@@ -182,7 +188,9 @@ class Lurker {
 
             if (style.toString().equals("asciidoc")) {
                 Asciidoctor asciidoctor = Asciidoctor.Factory.create();
-                Map<String, Object> options = OptionsBuilder.options().option("sourcemap", "true")
+                Map<String, Object> options = OptionsBuilder.options()
+                        .option("sourcemap", "true")
+                        .option("catalog_assets", "true")
                         .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 4)
                         .asMap();
 
@@ -212,7 +220,9 @@ class Lurker {
     ArrayList<ExtendedBlock> lurk(String path) {
         Asciidoctor asciidoctor = Asciidoctor.Factory.create();
 
-        Map<String, Object> options = OptionsBuilder.options().option("sourcemap", "true")
+        Map<String, Object> options = OptionsBuilder.options()
+                .option("sourcemap", "true")
+                .option("catalog_assets", "true")
                 .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 4)
                 .asMap();
 
