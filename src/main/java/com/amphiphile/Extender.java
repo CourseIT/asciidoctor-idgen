@@ -16,7 +16,7 @@ class Extender {
         this.allBlocks = allBlocks;
     }
 
-    public static <T> T getValueOrDefault(T value, T defaultValue) {
+    private static <T> T getValueOrDefault(T value, T defaultValue) {
         return value == null ? defaultValue : value;
     }
 
@@ -38,11 +38,7 @@ class Extender {
         bufferedReader.close();
 
 
-        for (int idx = 0; idx < allBlocks.size(); idx++)
-
-        {
-            ExtendedBlock extendedBlock = allBlocks.get(idx);
-
+        for (ExtendedBlock extendedBlock : allBlocks) {
             if (!extendedBlock.isIdentified && !extendedBlock.isEmbeddedDoc) {
                 System.out.println(extendedBlock.context);
                 if (extendedBlock.context.equals("paragraph")) {
@@ -58,25 +54,7 @@ class Extender {
                     shift += 1;
                     extendedBlock.isIdentified = true;
                 } else if (extendedBlock.context.equals("cell")) {
-                    // FIXME: не учтен случай нескольких совпадений строки
-
-                    if (!(extendedBlock.sourceText.equals("") || extendedBlock.sourceText == null)) {
-                        String beginText = extendedBlock.sourceText.split("\\r?\\n")[0];
-
-                        ExtendedBlock parentBlock = getParentBlock(extendedBlock);
-
-                        int startIdx = getValueOrDefault(parentBlock.sourceLine, 0);
-
-                        for (int line_idx = startIdx+shift; line_idx < lines.size(); line_idx++) {
-                            String line = lines.get(line_idx);
-
-                            if (line.contains(beginText)) {
-                                lines.set(line_idx, line.replaceAll(beginText, String.format("[[%s]]%s", extendedBlock.id, beginText)));
-                                break;
-                            }
-                        }
-                    }
-                    extendedBlock.isIdentified = true;
+                    addNestedId(lines, extendedBlock);
                 } else if (extendedBlock.context.endsWith("list")) {
 
                     if (!extendedBlock.style.equals("bibliography")) {
@@ -86,32 +64,7 @@ class Extender {
                     }
                 } else if (extendedBlock.context.contains("list_item")) {
 
-                    if (!(extendedBlock.sourceText.equals("") || extendedBlock.sourceText == null)) {
-                        String beginText = extendedBlock.sourceText.split("\\r?\\n")[0];
-
-
-                        ExtendedBlock parentBlock = getParentBlock(extendedBlock);
-
-                        int startIdx = getValueOrDefault(parentBlock.sourceLine, 0);
-
-                        // FIXME: не учтен случай нескольких совпадений строки
-                        for (int line_idx = startIdx+shift; line_idx < lines.size(); line_idx++) {
-                            String line = lines.get(line_idx);
-                            if (line.startsWith(String.format("%s %s", extendedBlock.marker, beginText))
-                                    ) {
-
-                                if (parentBlock.style.equals("bibliography")) {
-                                    lines.set(line_idx, String.format("%s [[[%s]]]%s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
-                                }
-                                {
-                                    lines.set(line_idx, String.format("%s [[%s]]%s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
-                                }
-
-                                break;
-                            }
-                        }
-                        extendedBlock.isIdentified = true;
-                    }
+                    addNestedId(lines, extendedBlock);
                 }
             }
         }
@@ -124,6 +77,39 @@ class Extender {
 
         fw.close();
         Files.delete((new File(copyPath).toPath()));
+    }
+
+
+    private void addNestedId(List<String> lines, ExtendedBlock extendedBlock) {
+
+        //FIXME: уточнить поиск на дубликаты, а также на простые строки (например, "1")
+        if (!(extendedBlock.sourceText.equals(""))) {
+            String beginText = extendedBlock.sourceText.split("\\r?\\n")[0];
+            ExtendedBlock parentBlock = getParentBlock(extendedBlock);
+            int startIdx = getValueOrDefault(parentBlock.sourceLine, 0);
+            for (int line_idx = startIdx + shift; line_idx < lines.size(); line_idx++) {
+                String line = lines.get(line_idx);
+
+                if (extendedBlock.context.contains("list_item")) {
+
+                    if (line.startsWith(String.format("%s %s", extendedBlock.marker, beginText))
+                            ) {
+                        if (parentBlock.style.equals("bibliography")) {
+                            lines.set(line_idx, String.format("%s [[[%s]]]%s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
+                        }
+                        {
+                            lines.set(line_idx, String.format("%s [[%s]]%s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
+                        }
+                        break;
+                    }
+                } else if (extendedBlock.context.equals("cell"))
+                    if (line.contains(beginText)) {
+                        lines.set(line_idx, line.replaceAll(beginText, String.format("[[%s]]%s", extendedBlock.id, beginText)));
+                        break;
+                    }
+            }
+        }
+        extendedBlock.isIdentified = true;
     }
 
 
