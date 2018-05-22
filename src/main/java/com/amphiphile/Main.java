@@ -14,8 +14,10 @@ public class Main {
 
         System.out.printf("All blocks: %d%n", allBlocks.size());
 
+        String outFilePath = System.getProperty("output", "G:\\jprojects\\elibrary\\Prikaz514n\\index_new.adoc");
+
         try {
-            Extender extender = new Extender(adocFilePath, allBlocks);
+            Extender extender = new Extender(adocFilePath, outFilePath, allBlocks);
             extender.extend();
         } catch (IOException e) {
             System.err.println(e.getMessage());

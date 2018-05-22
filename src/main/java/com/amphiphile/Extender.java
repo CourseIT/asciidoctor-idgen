@@ -9,10 +9,12 @@ import java.util.List;
 class Extender {
     private String path;
     private ArrayList<ExtendedBlock> allBlocks;
+    private String outPath;
     private int shift = 0; //количество новых линий, которое было вставлено в документ, относительно исходного
 
-    Extender(String path, ArrayList<ExtendedBlock> allBlocks) {
+    Extender(String path, String outPath, ArrayList<ExtendedBlock> allBlocks) {
         this.path = path;
+        this.outPath = outPath;
         this.allBlocks = allBlocks;
     }
 
@@ -68,8 +70,7 @@ class Extender {
                 }
             }
         }
-        String newFilePath = path.substring(0, lastDot) + "_new" + path.substring(lastDot);
-        FileWriter fw = new FileWriter(newFilePath);
+        FileWriter fw = new FileWriter(outPath);
 
         for (String line : lines) {
             fw.write(line + "\n");
