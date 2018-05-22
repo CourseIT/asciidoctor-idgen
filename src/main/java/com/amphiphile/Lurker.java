@@ -1,6 +1,5 @@
 package com.amphiphile;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.ast.*;
@@ -17,9 +16,9 @@ import java.util.regex.Pattern;
 
 class Lurker {
     private static ArrayList<ExtendedBlock> allBlocks = new ArrayList<>();
-    private String path;
     private Boolean parseListItems;
     private Boolean parseCells;
+    private String path;
 
     Lurker(String path) {
         this.path = path;
@@ -27,13 +26,7 @@ class Lurker {
         this.parseCells = false;
     }
 
-    Lurker(String path, Boolean parseListItems, Boolean parseCells) {
-        this.path = path;
-        this.parseListItems = parseListItems;
-        this.parseCells = parseCells;
-    }
-
-    private static void touch(StructuralNode block, Boolean isEmbeddedDoc) {
+    private void touch(StructuralNode block, Boolean isEmbeddedDoc) {
 
 
         if (!(block.getContext().equals("document") ||
@@ -51,7 +44,7 @@ class Lurker {
 
     }
 
-    private static void addBlock(StructuralNode block, Boolean isEmbeddedDoc) {
+    private void addBlock(StructuralNode block, Boolean isEmbeddedDoc) {
         ExtendedBlock extendedBlock = new ExtendedBlock();
 
         extendedBlock.context = block.getContext();
@@ -96,7 +89,7 @@ class Lurker {
 
     }
 
-    private static void checkNestedItems(StructuralNode block, Map blockParams) {
+    private void checkNestedItems(StructuralNode block, Map blockParams) {
         if (block.getContext().endsWith("list")) {
 
             for (Object listItem : ((ListImpl) block).getItems()) {
@@ -127,7 +120,7 @@ class Lurker {
         }
     }
 
-    private static void addListItem(ListItem listItem, Map listParams) {
+    private void addListItem(ListItem listItem, Map listParams) {
         ExtendedBlock extendedBlock = new ExtendedBlock();
 
 
@@ -161,7 +154,7 @@ class Lurker {
 
     }
 
-    private static String getInlineId(String sourceText, Map blockParams) {
+    private String getInlineId(String sourceText, Map blockParams) {
 
         String result = null;
 
@@ -190,14 +183,14 @@ class Lurker {
         return result;
     }
 
-    private static void checkRows(Row row, Map tableParams) {
+    private void checkRows(Row row, Map tableParams) {
         for (Cell cell : row.getCells()) {
             addCellItem(cell, tableParams);
 
         }
     }
 
-    private static void addCellItem(Cell cell, Map tableParams) {
+    private void addCellItem(Cell cell, Map tableParams) {
         Object style = cell.getAttributes().get("style");
 
         if (style != null) {
@@ -233,7 +226,11 @@ class Lurker {
         }
     }
 
-    ArrayList<ExtendedBlock> lurk() {
+    ArrayList<ExtendedBlock> lurk(Boolean parseListItems, Boolean parseCells) {
+
+        this.parseListItems = parseListItems;
+        this.parseCells = parseCells;
+
         Asciidoctor asciidoctor = Asciidoctor.Factory.create();
 
         Map<String, Object> options = OptionsBuilder.options()

@@ -12,8 +12,8 @@ public class Main {
         Boolean parseListItems = Boolean.parseBoolean(System.getProperty("parse-list-items", "false"));
         Boolean parseCells = Boolean.parseBoolean(System.getProperty("parse-cells", "false"));
 
-        Lurker lurker = new Lurker(adocFilePath, parseListItems, parseCells);
-        ArrayList<ExtendedBlock> allBlocks = lurker.lurk();
+        Lurker lurker = new Lurker(adocFilePath);
+        ArrayList<ExtendedBlock> allBlocks = lurker.lurk(parseListItems, parseCells);
 
         System.out.printf("All blocks: %d%n", allBlocks.size());
 
@@ -21,8 +21,8 @@ public class Main {
         Boolean identifyListItems = Boolean.parseBoolean(System.getProperty("id-list-items", "false"));
         Boolean identifyCells = Boolean.parseBoolean(System.getProperty("id-cells", "false"));
         try {
-            Extender extender = new Extender(adocFilePath, outFilePath, identifyListItems, identifyCells, allBlocks);
-            extender.extend();
+            Extender extender = new Extender(adocFilePath, outFilePath,  allBlocks);
+            extender.extend(identifyListItems, identifyCells);
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }

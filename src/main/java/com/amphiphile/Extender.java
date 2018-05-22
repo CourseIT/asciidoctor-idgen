@@ -23,20 +23,15 @@ class Extender {
         this.allBlocks = allBlocks;
     }
 
-    Extender(String path, String outPath, Boolean identifyListItems, Boolean identifyCells, ArrayList<ExtendedBlock> allBlocks) {
-        this.path = path;
-        this.outPath = outPath;
-        this.identifyListItems = identifyListItems;
-        this.identifyCells = identifyCells;
-
-        this.allBlocks = allBlocks;
-    }
 
     private static <T> T getValueOrDefault(T value, T defaultValue) {
         return value == null ? defaultValue : value;
     }
 
-    void extend() throws IOException {
+    void extend(Boolean identifyListItems, Boolean identifyCells) throws IOException {
+
+        this.identifyListItems = identifyListItems;
+        this.identifyCells = identifyCells;
 
         int lastDot = path.lastIndexOf('.');
         String copyPath = path.substring(0, lastDot) + "_copy" + path.substring(lastDot);
