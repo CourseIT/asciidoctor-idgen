@@ -1,5 +1,6 @@
 package com.amphiphile;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.ast.*;
@@ -17,9 +18,19 @@ import java.util.regex.Pattern;
 class Lurker {
     private static ArrayList<ExtendedBlock> allBlocks = new ArrayList<>();
     private String path;
+    private Boolean parseListItems;
+    private Boolean parseCells;
 
     Lurker(String path) {
         this.path = path;
+        this.parseListItems = false;
+        this.parseCells = false;
+    }
+
+    Lurker(String path, Boolean parseListItems, Boolean parseCells) {
+        this.path = path;
+        this.parseListItems = parseListItems;
+        this.parseCells = parseCells;
     }
 
     private static void touch(StructuralNode block, Boolean isEmbeddedDoc) {
