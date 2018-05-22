@@ -69,9 +69,6 @@ class Lurker {
         } else if (extendedBlock.context.equals("paragraph")) {
             extendedBlock.sourceText = ((BlockImpl) block).getSource();
 
-        } else if (extendedBlock.context.equals("table")) {
-            extendedBlock.title = block.getTitle();
-
         } else if (extendedBlock.context.equals("section")) {
             extendedBlock.title = block.getTitle();
 
@@ -80,8 +77,9 @@ class Lurker {
                 extendedBlock.sourceText = getListSource((ListImpl) block);
             }
         } else if (extendedBlock.context.equals("table")) {
+            extendedBlock.title = block.getTitle();
             if (!this.parseCells) {
-                extendedBlock.sourceText = getTableSource(block);
+                extendedBlock.sourceText = getTableSource((TableImpl) block);
             }
         }
 
@@ -128,9 +126,56 @@ class Lurker {
         return sourceText;
     }
 
-    private String getTableSource(StructuralNode block) {
-        String sourceText = "";//TODO
+    private String getTableSource(TableImpl table) {
+        String sourceText = "|===";
+
+        String rowSourceText;
+        for (Row header : table.getHeader()) {
+
+            rowSourceText = getRowSource(header);
+            if (!rowSourceText.equals("")) {
+                sourceText = String.join("\n\n", sourceText, rowSourceText);
+            }
+
+        }
+
+        for (Row footer : table.getFooter()) {
+            rowSourceText = getRowSource(footer);
+            if (!rowSourceText.equals("")) {
+                sourceText = String.join("\n\n", sourceText, rowSourceText);
+            }
+        }
+
+        for (Row body : table.getBody()) {
+
+            rowSourceText = getRowSource(body);
+            if (!rowSourceText.equals("")) {
+                sourceText = String.join("\n\n", sourceText, rowSourceText);
+            }
+        }
+
+        sourceText = String.join("\n", sourceText, "|===");
+
         return sourceText;
+    }
+
+    private String getRowSource(Row row) {
+        String rowSource = "";
+        for (Cell cell : row.getCells()) {
+            String cellSource = cell.getSource();
+
+            Object style = cell.getAttributes().get("style");
+
+            if (style != null) {
+
+                if (style.toString().equals("asciidoc")) {
+                    cellSource = cellSource + "\n";
+
+                }
+            }
+            rowSource = String.join("|", rowSource, cellSource);
+        }
+        return rowSource;
     }
 
     private void addNestedItems(StructuralNode block, Map blockParams) {
