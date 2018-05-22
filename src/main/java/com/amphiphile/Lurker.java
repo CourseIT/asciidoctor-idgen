@@ -62,34 +62,78 @@ class Lurker {
         if (block.getSourceLocation() != null) {
             extendedBlock.sourceLine = block.getSourceLocation().getLineNumber();
         }
-        switch (extendedBlock.context) {
-            case "image":
-                extendedBlock.target = (String) block.getAttributes().get("target");
-                extendedBlock.title = block.getTitle();
-                break;
-            case "paragraph":
-                extendedBlock.sourceText = ((BlockImpl) block).getSource();
-                break;
-            case "table":
-                extendedBlock.title = block.getTitle();
-                break;
-            case "section":
-                extendedBlock.title = block.getTitle();
-                break;
+        if (extendedBlock.context.equals("image")) {
+            extendedBlock.target = (String) block.getAttributes().get("target");
+            extendedBlock.title = block.getTitle();
+
+        } else if (extendedBlock.context.equals("paragraph")) {
+            extendedBlock.sourceText = ((BlockImpl) block).getSource();
+
+        } else if (extendedBlock.context.equals("table")) {
+            extendedBlock.title = block.getTitle();
+
+        } else if (extendedBlock.context.equals("section")) {
+            extendedBlock.title = block.getTitle();
+
+        } else if (extendedBlock.context.endsWith("list")) {
+            if (!this.parseListItems) {
+                extendedBlock.sourceText = getListSource((ListImpl) block);
+            }
+        } else if (extendedBlock.context.equals("table")) {
+            if (!this.parseCells) {
+                extendedBlock.sourceText = getTableSource(block);
+            }
         }
 
         allBlocks.add(extendedBlock);
 
-        Map<String, String> blockParams = new HashMap<>();
-        blockParams.put("id", extendedBlock.id);
-        blockParams.put("style", extendedBlock.style);
-        blockParams.put("isEmbeddedDoc", extendedBlock.isEmbeddedDoc.toString());
 
-        checkNestedItems(block, blockParams);
+        if (extendedBlock.context.endsWith("list") && this.parseListItems ||
+                extendedBlock.context.equals("table") && this.parseCells) {
+
+            Map<String, String> blockParams = new HashMap<>();
+            blockParams.put("id", extendedBlock.id);
+            blockParams.put("style", extendedBlock.style);
+            blockParams.put("isEmbeddedDoc", extendedBlock.isEmbeddedDoc.toString());
+
+            addNestedItems(block, blockParams);
+        }
+
 
     }
 
-    private void checkNestedItems(StructuralNode block, Map blockParams) {
+    private String getListSource(ListImpl list) {
+        String sourceText = "";
+
+        for (Object listItem : list.getItems()) {
+            ListItem item = (ListItem) listItem;
+
+            String itemSourceText = String.format("%s %s", item.getMarker(), item.getSource());
+
+            if (!sourceText.equals("")) {
+                sourceText = String.join("\n\n", sourceText, itemSourceText);
+            } else {
+                sourceText = itemSourceText;
+            }
+
+            if (item.getBlocks().size() != 0) {
+                for (StructuralNode listBlock : item.getBlocks()) {
+                    addBlock(listBlock, false);
+                }
+            }
+
+        }
+
+
+        return sourceText;
+    }
+
+    private String getTableSource(StructuralNode block) {
+        String sourceText = "";//TODO
+        return sourceText;
+    }
+
+    private void addNestedItems(StructuralNode block, Map blockParams) {
         if (block.getContext().endsWith("list")) {
 
             for (Object listItem : ((ListImpl) block).getItems()) {
@@ -97,6 +141,7 @@ class Lurker {
                 addListItem((ListItem) listItem, blockParams);
 
             }
+
         } else if (block.getContext().equals("table")) {
 
 
@@ -116,8 +161,9 @@ class Lurker {
                 checkRows(body, blockParams);
 
             }
-
         }
+
+
     }
 
     private void addListItem(ListItem listItem, Map listParams) {
