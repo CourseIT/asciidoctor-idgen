@@ -92,7 +92,7 @@ class Extender {
 
     private void addNestedId(List<String> lines, ExtendedBlock extendedBlock) {
 
-        //FIXME: уточнить поиск на дубликаты, а также на простые строки (например, "1")
+
         if (!(extendedBlock.sourceText.equals(""))) {
             String beginText = extendedBlock.sourceText.split("\\r?\\n")[0];
             ExtendedBlock parentBlock = getParentBlock(extendedBlock);
@@ -100,8 +100,8 @@ class Extender {
             for (int line_idx = startIdx + shift; line_idx < lines.size(); line_idx++) {
                 String line = lines.get(line_idx);
 
-                if (extendedBlock.context.contains("list_item")) {
-
+                if (extendedBlock.context.contains("list_item") && identifyListItems) {
+                    //FIXME: уточнить поиск на дубликаты, а также на простые строки (например, "1")
                     if (line.startsWith(String.format("%s %s", extendedBlock.marker, beginText))
                             ) {
                         if (parentBlock.style.equals("bibliography")) {
@@ -110,16 +110,20 @@ class Extender {
                         {
                             lines.set(line_idx, String.format("%s [[%s]]%s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
                         }
+                        extendedBlock.isIdentified = true;
+
                         break;
                     }
-                } else if (extendedBlock.context.equals("cell"))
+                } else if (extendedBlock.context.equals("cell") && identifyCells)
+                    //FIXME: уточнить поиск на дубликаты, а также на простые строки (например, "1")
                     if (line.contains(beginText)) {
                         lines.set(line_idx, line.replaceAll(beginText, String.format("[[%s]]%s", extendedBlock.id, beginText)));
+                        extendedBlock.isIdentified = true;
                         break;
                     }
             }
         }
-        extendedBlock.isIdentified = true;
+
     }
 
 
