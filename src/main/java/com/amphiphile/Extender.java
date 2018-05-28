@@ -52,7 +52,8 @@ class Extender {
 
         for (ExtendedBlock extendedBlock : allBlocks) {
             if (!extendedBlock.isIdentified && !extendedBlock.isEmbeddedDoc) {
-                if (extendedBlock.context.equals("paragraph")) {
+                if (extendedBlock.context.equals("paragraph") ||
+                        extendedBlock.context.endsWith("list") && !extendedBlock.style.equals("bibliography")) {
                     try {
                         lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
                         shift += 1;
@@ -70,13 +71,7 @@ class Extender {
                     extendedBlock.isIdentified = true;
                 } else if (extendedBlock.context.equals("cell")) {
                     addNestedId(lines, extendedBlock);
-                } else if (extendedBlock.context.endsWith("list")) {
 
-                    if (!extendedBlock.style.equals("bibliography")) {
-                        lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
-                        shift += 1;
-                        extendedBlock.isIdentified = true;
-                    }
                 } else if (extendedBlock.context.contains("list_item")) {
 
                     addNestedId(lines, extendedBlock);
@@ -128,7 +123,7 @@ class Extender {
                             //FIXME: уточнить поиск на дубликаты, а также на простые строки (например, "1")
                             if (extendedBlock.marker != null) {
                                 if (line.startsWith(String.format("%s %s", extendedBlock.marker, beginText))
-                                        ||line.startsWith(String.format("%s\t%s", extendedBlock.marker, beginText))
+                                        || line.startsWith(String.format("%s\t%s", extendedBlock.marker, beginText))
                                         ) {
                                     if (parentBlock.style != null && parentBlock.style.equals("bibliography")) {
                                         lines.set(line_idx, String.format("%s [[[%s]]] %s",
