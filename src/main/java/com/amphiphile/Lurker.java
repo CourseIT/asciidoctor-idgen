@@ -3,9 +3,7 @@ package com.amphiphile;
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.ast.*;
-import org.asciidoctor.ast.impl.BlockImpl;
-import org.asciidoctor.ast.impl.ListImpl;
-import org.asciidoctor.ast.impl.TableImpl;
+import org.asciidoctor.ast.impl.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -77,7 +75,12 @@ class Lurker {
 
         } else if (extendedBlock.context.endsWith("list")) {
             if (!this.parseListItems) {
-                extendedBlock.sourceText = getListSource((ListImpl) block);
+
+                if (block instanceof ListImpl) {
+                    extendedBlock.sourceText = getListSource((ListImpl) block);
+                } else if (block instanceof DescriptionListImpl) {
+                    extendedBlock.sourceText = getListSource((DescriptionListImpl) block);
+                }
             }
         } else if (extendedBlock.context.equals("table")) {
             extendedBlock.title = block.getTitle();
@@ -108,7 +111,6 @@ class Lurker {
 
         for (Object listItem : list.getItems()) {
             ListItem item = (ListItem) listItem;
-
             String itemSourceText = String.format("%s %s", item.getMarker(), item.getSource());
 
             if (!sourceText.equals("")) {
@@ -123,11 +125,34 @@ class Lurker {
                 }
             }
 
+
         }
 
 
         return sourceText;
     }
+
+    private String getListSource(DescriptionListImpl list) {
+        String sourceText = "";
+
+        for (Object listItem : list.getItems()) {
+            DescriptionListEntryImpl item = (DescriptionListEntryImpl) listItem;
+
+
+            String itemSourceText = String.format("%s:: %s",
+                    item.getTerms().get(0).getText(), item.getDescription().getText());//TODO: multiple terms
+
+            if (!sourceText.equals("")) {
+                sourceText = String.join("\n\n", sourceText, itemSourceText);
+            } else {
+                sourceText = itemSourceText;
+            }
+        }
+
+
+        return sourceText;
+    }
+
 
     private String getTableSource(TableImpl table) {
         String sourceText = "|===";
@@ -187,10 +212,16 @@ class Lurker {
 
             if (this.parseListItems ||
                     this.parseBiblioItems && blockParams.get("style").toString().equals("bibliography")) {
-                for (Object listItem : ((ListImpl) block).getItems()) {
 
-                    addListItem((ListItem) listItem, blockParams);
+                if (block instanceof ListImpl) {
+                    for (Object listItem : ((ListImpl) block).getItems()) {
+                        addListItem((ListItem) listItem, blockParams);
+                    }
+                } else if (block instanceof DescriptionListImpl) {
+                    for (Object listItem : ((DescriptionListImpl) block).getItems()) {
+                        addListItem((ListItem) listItem, blockParams);
 
+                    }
                 }
             }
 
