@@ -10,6 +10,7 @@ class Extender {
     private String path;
     private String outPath;
     private Boolean identifyListItems;
+    private Boolean identifyBiblioItems;
     private Boolean identifyCells;
     private ArrayList<ExtendedBlock> allBlocks;
     private int shift = 0; //количество новых линий, которое было вставлено в документ, относительно исходного
@@ -18,6 +19,7 @@ class Extender {
         this.path = path;
         this.outPath = outPath;
         this.identifyListItems = false;
+        this.identifyBiblioItems = false;
         this.identifyCells = false;
 
         this.allBlocks = allBlocks;
@@ -28,9 +30,10 @@ class Extender {
         return value == null ? defaultValue : value;
     }
 
-    void extend(Boolean identifyListItems, Boolean identifyCells) throws IOException {
+    void extend(Boolean identifyListItems, Boolean identifyBiblioItems, Boolean identifyCells) throws IOException {
 
         this.identifyListItems = identifyListItems;
+        this.identifyBiblioItems = identifyBiblioItems;
         this.identifyCells = identifyCells;
 
         int lastDot = path.lastIndexOf('.');
@@ -69,7 +72,7 @@ class Extender {
                 } else if (extendedBlock.context.endsWith("list")) {
 
                     if (!extendedBlock.style.equals("bibliography")) {
-                        lines.add(extendedBlock.sourceLine + shift - 1 - 1, "[[" + extendedBlock.id + "]]");
+                        lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
                         shift += 1;
                         extendedBlock.isIdentified = true;
                     }
@@ -97,22 +100,25 @@ class Extender {
             String beginText = extendedBlock.sourceText.split("\\r?\\n")[0];
             ExtendedBlock parentBlock = getParentBlock(extendedBlock);
             int startIdx = getValueOrDefault(parentBlock.sourceLine, 0);
-            for (int line_idx = startIdx + shift; line_idx < lines.size(); line_idx++) {
+            for (int line_idx = startIdx + shift - 1; line_idx < lines.size(); line_idx++) {
                 String line = lines.get(line_idx);
 
-                if (extendedBlock.context.contains("list_item") && identifyListItems) {
-                    //FIXME: уточнить поиск на дубликаты, а также на простые строки (например, "1")
-                    if (line.startsWith(String.format("%s %s", extendedBlock.marker, beginText))
-                            ) {
-                        if (parentBlock.style.equals("bibliography")) {
-                            lines.set(line_idx, String.format("%s [[[%s]]]%s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
-                        }
-                        {
-                            lines.set(line_idx, String.format("%s [[%s]]%s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
-                        }
-                        extendedBlock.isIdentified = true;
+                if (extendedBlock.context.contains("list_item")) {
+                    if (identifyListItems ||
+                            identifyBiblioItems && parentBlock.style.equals("bibliography")) {
+                        //FIXME: уточнить поиск на дубликаты, а также на простые строки (например, "1")
+                        if (line.startsWith(String.format("%s %s", extendedBlock.marker, beginText))
+                                ) {
+                            if (parentBlock.style.equals("bibliography")) {
+                                lines.set(line_idx, String.format("%s [[[%s]]] %s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
+                            }
+                            {
+                                lines.set(line_idx, String.format("%s [[%s]]%s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
+                            }
+                            extendedBlock.isIdentified = true;
 
-                        break;
+                            break;
+                        }
                     }
                 } else if (extendedBlock.context.equals("cell") && identifyCells)
                     //FIXME: уточнить поиск на дубликаты, а также на простые строки (например, "1")

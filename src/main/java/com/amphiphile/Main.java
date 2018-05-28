@@ -10,19 +10,21 @@ public class Main {
 
         String adocFilePath = System.getProperty("input", "G:\\jprojects\\elibrary\\Prikaz514n\\index.adoc");
         Boolean parseListItems = Boolean.parseBoolean(System.getProperty("parse-list-items", "false"));
+        Boolean parseBiblioItems = Boolean.parseBoolean(System.getProperty("parse-biblio-items", "true"));
         Boolean parseCells = Boolean.parseBoolean(System.getProperty("parse-cells", "false"));
 
         Lurker lurker = new Lurker(adocFilePath);
-        ArrayList<ExtendedBlock> allBlocks = lurker.lurk(parseListItems, parseCells);
+        ArrayList<ExtendedBlock> allBlocks = lurker.lurk(parseListItems, parseBiblioItems, parseCells);
 
         System.out.printf("All blocks: %d%n", allBlocks.size());
 
         String outFilePath = System.getProperty("output", "G:\\jprojects\\elibrary\\Prikaz514n\\index_new.adoc");
         Boolean identifyListItems = Boolean.parseBoolean(System.getProperty("id-list-items", "false"));
+        Boolean identifyBiblioItems = Boolean.parseBoolean(System.getProperty("id-biblio-items", "true"));
         Boolean identifyCells = Boolean.parseBoolean(System.getProperty("id-cells", "false"));
         try {
-            Extender extender = new Extender(adocFilePath, outFilePath,  allBlocks);
-            extender.extend(identifyListItems, identifyCells);
+            Extender extender = new Extender(adocFilePath, outFilePath, allBlocks);
+            extender.extend(identifyListItems, identifyBiblioItems, identifyCells);
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }

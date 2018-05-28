@@ -17,12 +17,14 @@ import java.util.regex.Pattern;
 class Lurker {
     private static ArrayList<ExtendedBlock> allBlocks = new ArrayList<>();
     private Boolean parseListItems;
+    private Boolean parseBiblioItems;
     private Boolean parseCells;
     private String path;
 
     Lurker(String path) {
         this.path = path;
         this.parseListItems = false;
+        this.parseBiblioItems = false;
         this.parseCells = false;
     }
 
@@ -86,7 +88,7 @@ class Lurker {
         allBlocks.add(extendedBlock);
 
 
-        if (extendedBlock.context.endsWith("list") && this.parseListItems ||
+        if (extendedBlock.context.endsWith("list") && (this.parseListItems || this.parseBiblioItems) ||
                 extendedBlock.context.equals("table") && this.parseCells) {
 
             Map<String, String> blockParams = new HashMap<>();
@@ -181,10 +183,14 @@ class Lurker {
     private void addNestedItems(StructuralNode block, Map blockParams) {
         if (block.getContext().endsWith("list")) {
 
-            for (Object listItem : ((ListImpl) block).getItems()) {
 
-                addListItem((ListItem) listItem, blockParams);
+            if (this.parseListItems ||
+                    this.parseBiblioItems && blockParams.get("style").toString().equals("bibliography")) {
+                for (Object listItem : ((ListImpl) block).getItems()) {
 
+                    addListItem((ListItem) listItem, blockParams);
+
+                }
             }
 
         } else if (block.getContext().equals("table")) {
@@ -317,9 +323,10 @@ class Lurker {
         }
     }
 
-    ArrayList<ExtendedBlock> lurk(Boolean parseListItems, Boolean parseCells) {
+    ArrayList<ExtendedBlock> lurk(Boolean parseListItems, boolean parseBiblioItems, Boolean parseCells) {
 
         this.parseListItems = parseListItems;
+        this.parseBiblioItems = parseBiblioItems;
         this.parseCells = parseCells;
 
         Asciidoctor asciidoctor = Asciidoctor.Factory.create();
