@@ -128,10 +128,14 @@ class Extender {
                                     ) {
                                 if (parentBlock.style.equals("bibliography")) {
                                     lines.set(line_idx, String.format("%s [[[%s]]] %s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
-                                }
-                                {
+                                } else {
                                     lines.set(line_idx, String.format("%s [[%s]]%s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
                                 }
+                                extendedBlock.isIdentified = true;
+
+                                break;
+                            } else if (line.startsWith(beginText)) {
+                                lines.set(line_idx, String.format("[[%s]]%s", extendedBlock.id, lines.get(line_idx)));
                                 extendedBlock.isIdentified = true;
 
                                 break;

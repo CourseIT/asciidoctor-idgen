@@ -140,7 +140,7 @@ class Lurker {
 
 
             String itemSourceText = String.format("%s:: %s",
-                    item.getTerms().get(0).getText(), item.getDescription().getText());//TODO: multiple terms
+                    item.getTerms().get(0).getSource(), item.getDescription().getSource());//TODO: multiple terms
 
             if (!sourceText.equals("")) {
                 sourceText = String.join("\n\n", sourceText, itemSourceText);
@@ -219,7 +219,7 @@ class Lurker {
                     }
                 } else if (block instanceof DescriptionListImpl) {
                     for (Object listItem : ((DescriptionListImpl) block).getItems()) {
-                        addListItem((ListItem) listItem, blockParams);
+                        addListItem((DescriptionListEntry) listItem, blockParams);
 
                     }
                 }
@@ -283,6 +283,31 @@ class Lurker {
 
     }
 
+    private void addListItem(DescriptionListEntry listItem, Map listParams) {
+        ExtendedBlock extendedBlock = new ExtendedBlock();
+
+
+        extendedBlock.context = "list_item";
+
+        extendedBlock.sourceText = String.format("%s:: %s",
+                listItem.getTerms().get(0).getSource(), listItem.getDescription().getSource());//TODO: multiple terms;
+        extendedBlock.id = getInlineId(extendedBlock.sourceText, listParams);
+
+        if (extendedBlock.id != null) {
+            extendedBlock.isIdentified = true;
+        } else {
+            IdGenerator idGenerator = new IdGenerator();
+            extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(4));
+        }
+        extendedBlock.id = extendedBlock.id.toLowerCase();
+        extendedBlock.parentId = listParams.get("id").toString();
+        extendedBlock.isEmbeddedDoc = Boolean.parseBoolean(listParams.get("isEmbeddedDoc").toString());
+
+        allBlocks.add(extendedBlock);
+
+
+    }
+
     private String getInlineId(String sourceText, Map blockParams) {
 
         String result = null;
@@ -309,7 +334,6 @@ class Lurker {
                 }
             }
         }
-
 
         return result;
     }
