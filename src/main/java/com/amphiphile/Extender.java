@@ -133,7 +133,8 @@ class Extender {
                                         lines.set(line_idx, String.format("%s [[[%s]]] %s",
                                                 extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
                                     } else {
-                                        lines.set(line_idx, String.format("%s [[%s]]%s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
+                                        lines.set(line_idx, String.format("%s [[%s]]%s",
+                                                extendedBlock.marker, extendedBlock.id, beginText));
                                     }
                                     extendedBlock.isIdentified = true;
 
