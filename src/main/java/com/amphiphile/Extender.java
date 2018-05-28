@@ -1,5 +1,8 @@
 package com.amphiphile;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -9,15 +12,17 @@ import java.util.List;
 class Extender {
     private String path;
     private String outPath;
+    private String jsonFilePath;
     private Boolean identifyListItems;
     private Boolean identifyBiblioItems;
     private Boolean identifyCells;
     private ArrayList<ExtendedBlock> allBlocks;
     private int shift = 0; //количество новых линий, которое было вставлено в документ, относительно исходного
 
-    Extender(String path, String outPath, ArrayList<ExtendedBlock> allBlocks) {
+    Extender(String path, String outPath, String jsonFilePath, ArrayList<ExtendedBlock> allBlocks) {
         this.path = path;
         this.outPath = outPath;
+        this.jsonFilePath = jsonFilePath;
         this.identifyListItems = false;
         this.identifyBiblioItems = false;
         this.identifyCells = false;
@@ -82,6 +87,23 @@ class Extender {
                 }
             }
         }
+
+
+        if (jsonFilePath != null) {
+
+            try (Writer writer = new FileWriter(jsonFilePath)) {
+                GsonBuilder gsonBuilder = new GsonBuilder();
+                gsonBuilder.disableHtmlEscaping().setPrettyPrinting();
+                Gson gson = gsonBuilder.create();
+                gson.toJson(allBlocks, writer);
+
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+            }
+
+        }
+
+
         FileWriter fw = new FileWriter(outPath);
 
         for (String line : lines) {
