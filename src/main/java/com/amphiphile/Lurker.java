@@ -89,9 +89,7 @@ class Lurker {
             }
         }
 
-        if (!extendedBlock.context.equals("paragraph") && extendedBlock.sourceText != null) {
-            allBlocks.add(extendedBlock);
-        }
+        allBlocks.add(extendedBlock);
 
         if (extendedBlock.context.endsWith("list") && (this.parseListItems || this.parseBiblioItems) ||
                 extendedBlock.context.equals("table") && this.parseCells) {
