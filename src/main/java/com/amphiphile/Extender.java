@@ -128,6 +128,7 @@ class Extender {
                             //FIXME: уточнить поиск на дубликаты, а также на простые строки (например, "1")
                             if (extendedBlock.marker != null) {
                                 if (line.startsWith(String.format("%s %s", extendedBlock.marker, beginText))
+                                        ||line.startsWith(String.format("%s\t%s", extendedBlock.marker, beginText))
                                         ) {
                                     if (parentBlock.style != null && parentBlock.style.equals("bibliography")) {
                                         lines.set(line_idx, String.format("%s [[[%s]]] %s",
