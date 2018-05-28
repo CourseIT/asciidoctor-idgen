@@ -53,9 +53,13 @@ class Extender {
         for (ExtendedBlock extendedBlock : allBlocks) {
             if (!extendedBlock.isIdentified && !extendedBlock.isEmbeddedDoc) {
                 if (extendedBlock.context.equals("paragraph")) {
-                    lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
-                    shift += 1;
-                    extendedBlock.isIdentified = true;
+                    try {
+                        lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
+                        shift += 1;
+                        extendedBlock.isIdentified = true;
+                    } catch (IndexOutOfBoundsException e) {
+                        System.err.println(String.format("Source line: %s, Shift %s, Error message: %s", extendedBlock.sourceLine, shift, e.getMessage()));
+                    }
                 } else if (extendedBlock.context.equals("image")) {
                     lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
                     shift += 1;
