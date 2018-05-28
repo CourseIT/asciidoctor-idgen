@@ -287,9 +287,11 @@ class Lurker {
 
         String result = null;
 
+        String beginText = sourceText.split("\\r?\\n")[0];
+
         if (blockParams.get("style") != null && blockParams.get("style").toString().equals("bibliography")) {
             Pattern InlineBiblioAnchorRx = Pattern.compile("^\\[\\[\\[([\\p{Alpha}_:][\\w:.-]*)(?:, *(.+?))?]]].*");
-            Matcher m = InlineBiblioAnchorRx.matcher(sourceText);
+            Matcher m = InlineBiblioAnchorRx.matcher(beginText);
             if (m.matches()) {
                 result = m.group(1);
             }
@@ -298,7 +300,7 @@ class Lurker {
 
             Pattern InlineAnchorRx = Pattern.compile("(?:\\\\)?(?:\\[\\[([\\p{Alpha}_:][\\w:.-]*)(?:, *(.+?))?]]|" +
                     "anchor:([\\p{Alpha}_:][\\w:.-]*)\\[(?:]|(.*?[^\\\\])])).*");
-            Matcher m = InlineAnchorRx.matcher(sourceText);
+            Matcher m = InlineAnchorRx.matcher(beginText);
             if (m.matches()) {
                 if (m.group(1) != null) {
                     result = m.group(1);

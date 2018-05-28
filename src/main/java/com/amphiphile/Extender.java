@@ -55,7 +55,6 @@ class Extender {
 
         for (ExtendedBlock extendedBlock : allBlocks) {
             if (!extendedBlock.isIdentified && !extendedBlock.isEmbeddedDoc) {
-                System.out.println(extendedBlock.context);
                 if (extendedBlock.context.equals("paragraph")) {
                     lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
                     shift += 1;
@@ -123,18 +122,20 @@ class Extender {
                 if (extendedBlock.context.contains("list_item")) {
                     if (identifyListItems ||
                             identifyBiblioItems && parentBlock.style.equals("bibliography")) {
-                        //FIXME: уточнить поиск на дубликаты, а также на простые строки (например, "1")
-                        if (line.startsWith(String.format("%s %s", extendedBlock.marker, beginText))
-                                ) {
-                            if (parentBlock.style.equals("bibliography")) {
-                                lines.set(line_idx, String.format("%s [[[%s]]] %s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
-                            }
-                            {
-                                lines.set(line_idx, String.format("%s [[%s]]%s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
-                            }
-                            extendedBlock.isIdentified = true;
+                        if (extendedBlock.sourceText.length() >= 7) {
+                            //FIXME: уточнить поиск на дубликаты, а также на простые строки (например, "1")
+                            if (line.startsWith(String.format("%s %s", extendedBlock.marker, beginText))
+                                    ) {
+                                if (parentBlock.style.equals("bibliography")) {
+                                    lines.set(line_idx, String.format("%s [[[%s]]] %s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
+                                }
+                                {
+                                    lines.set(line_idx, String.format("%s [[%s]]%s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
+                                }
+                                extendedBlock.isIdentified = true;
 
-                            break;
+                                break;
+                            }
                         }
                     }
                 } else if (extendedBlock.context.equals("cell") && identifyCells)
