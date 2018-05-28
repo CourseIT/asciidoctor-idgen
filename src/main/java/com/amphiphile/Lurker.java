@@ -93,7 +93,7 @@ class Lurker {
 
             Map<String, String> blockParams = new HashMap<>();
             blockParams.put("id", extendedBlock.id);
-            blockParams.put("style", extendedBlock.style);
+            blockParams.put("style", DefaultValueHandler.getValueOrDefault(extendedBlock.style, ""));
             blockParams.put("isEmbeddedDoc", extendedBlock.isEmbeddedDoc.toString());
 
             addNestedItems(block, blockParams);

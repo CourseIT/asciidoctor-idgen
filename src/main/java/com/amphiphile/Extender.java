@@ -31,10 +31,6 @@ class Extender {
     }
 
 
-    private static <T> T getValueOrDefault(T value, T defaultValue) {
-        return value == null ? defaultValue : value;
-    }
-
     void extend(Boolean identifyListItems, Boolean identifyBiblioItems, Boolean identifyCells) throws IOException {
 
         this.identifyListItems = identifyListItems;
@@ -92,8 +88,7 @@ class Extender {
         if (jsonFilePath != null) {
 
             try (Writer writer = new FileWriter(jsonFilePath)) {
-                GsonBuilder gsonBuilder = new GsonBuilder();
-                gsonBuilder.disableHtmlEscaping().setPrettyPrinting();
+                GsonBuilder gsonBuilder = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting();
                 Gson gson = gsonBuilder.create();
                 gson.toJson(allBlocks, writer);
 
@@ -121,7 +116,7 @@ class Extender {
         if (!(extendedBlock.sourceText.equals(""))) {
             String beginText = extendedBlock.sourceText.split("\\r?\\n")[0];
             ExtendedBlock parentBlock = getParentBlock(extendedBlock);
-            int startIdx = getValueOrDefault(parentBlock.sourceLine, 0);
+            int startIdx = DefaultValueHandler.getValueOrDefault(parentBlock.sourceLine, 0);
             for (int line_idx = startIdx + shift - 1; line_idx < lines.size(); line_idx++) {
                 String line = lines.get(line_idx);
 
