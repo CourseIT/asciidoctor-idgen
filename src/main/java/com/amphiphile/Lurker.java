@@ -125,9 +125,7 @@ class Lurker {
                 }
             }
 
-
         }
-
 
         return sourceText;
     }
@@ -137,7 +135,6 @@ class Lurker {
 
         for (Object listItem : list.getItems()) {
             DescriptionListEntryImpl item = (DescriptionListEntryImpl) listItem;
-
 
             String itemSourceText = String.format("%s:: %s",
                     item.getTerms().get(0).getSource(), item.getDescription().getSource());//TODO: multiple terms
@@ -149,10 +146,8 @@ class Lurker {
             }
         }
 
-
         return sourceText;
     }
-
 
     private String getTableSource(TableImpl table) {
         String sourceText = "|===";
@@ -209,7 +204,6 @@ class Lurker {
     private void addNestedItems(StructuralNode block, Map blockParams) {
         if (block.getContext().endsWith("list")) {
 
-
             if (this.parseListItems ||
                     this.parseBiblioItems && blockParams.get("style").toString().equals("bibliography")) {
 
@@ -226,7 +220,6 @@ class Lurker {
             }
 
         } else if (block.getContext().equals("table")) {
-
 
             Table table = (TableImpl) block;
 
@@ -246,12 +239,10 @@ class Lurker {
             }
         }
 
-
     }
 
     private void addListItem(ListItem listItem, Map listParams) {
         ExtendedBlock extendedBlock = new ExtendedBlock();
-
 
         extendedBlock.context = listItem.getContext();
         extendedBlock.id = getInlineId(listItem.getSource(), listParams);
@@ -280,12 +271,10 @@ class Lurker {
             }
         }
 
-
     }
 
     private void addListItem(DescriptionListEntry listItem, Map listParams) {
         ExtendedBlock extendedBlock = new ExtendedBlock();
-
 
         extendedBlock.context = "list_item";
 
@@ -304,7 +293,6 @@ class Lurker {
         extendedBlock.isEmbeddedDoc = Boolean.parseBoolean(listParams.get("isEmbeddedDoc").toString());
 
         allBlocks.add(extendedBlock);
-
 
     }
 
@@ -396,7 +384,6 @@ class Lurker {
 
         Document document = asciidoctor.loadFile(new File(path), options);
         touch(document, false);
-
 
         return allBlocks;
     }

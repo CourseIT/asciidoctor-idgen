@@ -30,7 +30,6 @@ class Extender {
         this.allBlocks = allBlocks;
     }
 
-
     void extend(Boolean identifyListItems, Boolean identifyBiblioItems, Boolean identifyCells) throws IOException {
 
         this.identifyListItems = identifyListItems;
@@ -39,7 +38,6 @@ class Extender {
 
         int lastDot = path.lastIndexOf('.');
         String copyPath = path.substring(0, lastDot) + "_copy" + path.substring(lastDot);
-
 
         Files.copy((new File(path)).toPath(), (new File(copyPath)).toPath(), StandardCopyOption.REPLACE_EXISTING);
 
@@ -51,7 +49,6 @@ class Extender {
             lines.add(nextLine);
         }
         bufferedReader.close();
-
 
         for (ExtendedBlock extendedBlock : allBlocks) {
             if (!extendedBlock.isIdentified && !extendedBlock.isEmbeddedDoc) {
@@ -83,7 +80,6 @@ class Extender {
             }
         }
 
-
         if (jsonFilePath != null) {
 
             try (Writer writer = new FileWriter(jsonFilePath)) {
@@ -97,7 +93,6 @@ class Extender {
 
         }
 
-
         FileWriter fw = new FileWriter(outPath);
 
         for (String line : lines) {
@@ -108,9 +103,7 @@ class Extender {
         Files.delete((new File(copyPath).toPath()));
     }
 
-
     private void addNestedId(List<String> lines, ExtendedBlock extendedBlock) {
-
 
         if (!(extendedBlock.sourceText.equals(""))) {
             String beginText = extendedBlock.sourceText.split("\\r?\\n")[0];
@@ -153,7 +146,6 @@ class Extender {
         }
 
     }
-
 
     private ExtendedBlock getParentBlock(ExtendedBlock extendedBlock) {
         ExtendedBlock parentBlock = new ExtendedBlock();
