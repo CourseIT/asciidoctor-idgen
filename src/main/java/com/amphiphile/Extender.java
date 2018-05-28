@@ -114,7 +114,7 @@ class Extender {
 //            }
             int startIdx = 1;
             for (int line_idx = startIdx + shift - 1; line_idx < lines.size(); line_idx++) {
-                String line = lines.get(line_idx);
+                String line = lines.get(line_idx).trim();
 
                 if (extendedBlock.context.contains("list_item")) {
                     if (identifyListItems ||
