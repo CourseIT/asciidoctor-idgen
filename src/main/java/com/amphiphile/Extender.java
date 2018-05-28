@@ -108,7 +108,12 @@ class Extender {
         if (!(extendedBlock.sourceText.equals(""))) {
             String beginText = extendedBlock.sourceText.split("\\r?\\n")[0];
             ExtendedBlock parentBlock = getParentBlock(extendedBlock);
-            int startIdx = DefaultValueHandler.getValueOrDefault(parentBlock.sourceLine, 0);
+//            int startIdx = DefaultValueHandler.getValueOrDefault(parentBlock.sourceLine, 0);
+//
+//            if (extendedBlock.marker != null && extendedBlock.marker.length() >= 2) {
+//                startIdx = 1;// для вложенных листов неправильно работает sourceline
+//            }
+            int startIdx = 1;
             for (int line_idx = startIdx + shift - 1; line_idx < lines.size(); line_idx++) {
                 String line = lines.get(line_idx);
 
@@ -117,18 +122,21 @@ class Extender {
                             identifyBiblioItems && parentBlock.style.equals("bibliography")) {
                         if (extendedBlock.sourceText.length() >= 7) {
                             //FIXME: уточнить поиск на дубликаты, а также на простые строки (например, "1")
-                            if (line.startsWith(String.format("%s %s", extendedBlock.marker, beginText))
-                                    ) {
-                                if (parentBlock.style.equals("bibliography")) {
-                                    lines.set(line_idx, String.format("%s [[[%s]]] %s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
-                                } else {
-                                    lines.set(line_idx, String.format("%s [[%s]]%s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
-                                }
-                                extendedBlock.isIdentified = true;
+                            if (extendedBlock.marker != null) {
+                                if (line.startsWith(String.format("%s %s", extendedBlock.marker, beginText))
+                                        ) {
+                                    if (parentBlock.style != null && parentBlock.style.equals("bibliography")) {
+                                        lines.set(line_idx, String.format("%s [[[%s]]] %s",
+                                                extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
+                                    } else {
+                                        lines.set(line_idx, String.format("%s [[%s]]%s", extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
+                                    }
+                                    extendedBlock.isIdentified = true;
 
-                                break;
+                                    break;
+                                }
                             } else if (line.startsWith(beginText)) {
-                                lines.set(line_idx, String.format("[[%s]]%s", extendedBlock.id, lines.get(line_idx)));
+                                lines.set(line_idx, String.format("[[%s]]%s", extendedBlock.id, line));
                                 extendedBlock.isIdentified = true;
 
                                 break;
