@@ -1,5 +1,7 @@
 package com.amphiphile;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.ast.*;
@@ -8,6 +10,9 @@ import org.asciidoctor.ast.impl.ListImpl;
 import org.asciidoctor.ast.impl.TableImpl;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,9 +25,11 @@ class Lurker {
     private Boolean parseBiblioItems;
     private Boolean parseCells;
     private String path;
+    private String jsonFilePath;
 
     Lurker(String path) {
         this.path = path;
+        this.jsonFilePath = jsonFilePath;
         this.parseListItems = false;
         this.parseBiblioItems = false;
         this.parseCells = false;
@@ -323,11 +330,12 @@ class Lurker {
         }
     }
 
-    ArrayList<ExtendedBlock> lurk(Boolean parseListItems, boolean parseBiblioItems, Boolean parseCells) {
+    ArrayList<ExtendedBlock> lurk(Boolean parseListItems, boolean parseBiblioItems, Boolean parseCells, String jsonFilePath) {
 
         this.parseListItems = parseListItems;
         this.parseBiblioItems = parseBiblioItems;
         this.parseCells = parseCells;
+        this.jsonFilePath = jsonFilePath;
 
         Asciidoctor asciidoctor = Asciidoctor.Factory.create();
 
@@ -339,6 +347,22 @@ class Lurker {
 
         Document document = asciidoctor.loadFile(new File(path), options);
         touch(document, false);
+
+        if (jsonFilePath != null) {
+
+            try (Writer writer = new FileWriter(jsonFilePath)) {
+                GsonBuilder gsonBuilder = new GsonBuilder();
+                gsonBuilder.disableHtmlEscaping().setPrettyPrinting();
+                Gson gson = gsonBuilder.create();
+                gson.toJson(allBlocks, writer);
+
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+            }
+
+        }
+
+
         return allBlocks;
     }
 
