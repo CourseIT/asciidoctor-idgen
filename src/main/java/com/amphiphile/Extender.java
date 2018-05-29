@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class Extender {
     private String path;
@@ -117,14 +119,17 @@ class Extender {
                 String line = lines.get(line_idx).trim();
 
                 if (extendedBlock.context.contains("list_item")) {
+
                     if (identifyListItems ||
                             identifyBiblioItems && parentBlock.style.equals("bibliography")) {
                         if (extendedBlock.sourceText.length() >= 7) {
-                            //FIXME: уточнить поиск на дубликаты, а также на простые строки (например, "1")
-                            if (extendedBlock.marker != null) {
-                                if (line.startsWith(String.format("%s %s", extendedBlock.marker, beginText))
-                                        || line.startsWith(String.format("%s\t%s", extendedBlock.marker, beginText))
-                                        ) {
+                            if (extendedBlock.marker != null) { // обычный список
+
+                                Pattern SimpleListRx = Pattern.compile(String.format("^[ \\t]*(%s)[ \\t]+(%s)$",
+                                        Pattern.quote(extendedBlock.marker), Pattern.quote(beginText)));
+
+                                Matcher m = SimpleListRx.matcher(line);
+                                if (m.matches()) {
                                     if (parentBlock.style != null && parentBlock.style.equals("bibliography")) {
                                         lines.set(line_idx, String.format("%s [[[%s]]] %s",
                                                 extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
@@ -136,11 +141,16 @@ class Extender {
 
                                     break;
                                 }
-                            } else if (line.startsWith(beginText)) {
-                                lines.set(line_idx, String.format("[[%s]]%s", extendedBlock.id, line));
-                                extendedBlock.isIdentified = true;
+                            } else if (!(extendedBlock.term == null && extendedBlock.description == null)) // список определений
+                            {
 
-                                break;
+                                if (line.startsWith(beginText)) // TODO: regex
+                                {
+                                    lines.set(line_idx, String.format("[[%s]]%s", extendedBlock.id, line));
+                                    extendedBlock.isIdentified = true;
+
+                                    break;
+                                }
                             }
                         }
                     }

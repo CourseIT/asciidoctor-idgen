@@ -277,8 +277,12 @@ class Lurker {
 
         extendedBlock.context = "list_item";
 
+        extendedBlock.term = listItem.getTerms().get(0).getSource(); //TODO: multiple terms;
+        extendedBlock.description = listItem.getDescription().getSource();
+
         extendedBlock.sourceText = String.format("%s:: %s",
-                listItem.getTerms().get(0).getSource(), listItem.getDescription().getSource());//TODO: multiple terms;
+                extendedBlock.term, extendedBlock.description);
+
         extendedBlock.id = getInlineId(extendedBlock.sourceText, listParams);
 
         if (extendedBlock.id != null) {
