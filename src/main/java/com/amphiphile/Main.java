@@ -7,8 +7,15 @@ public class Main {
 
     public static void main(String[] args) {
 
-        String adocFilePath = System.getProperty("input", "G:\\jprojects\\elibrary\\GLPS\\index.adoc");
-        String jsonFilePath = System.getProperty("json", "G:\\jprojects\\elibrary\\GLPS\\index.json");
+        String adocFilePath = System.getProperty("input");
+        if (adocFilePath == null) {
+            throw new IllegalArgumentException("input is a required property");
+        }
+        String jsonFilePath = System.getProperty("json");
+        if (jsonFilePath == null) {
+            throw new IllegalArgumentException("json is a required property");
+        }
+
         Boolean parseListItems = Boolean.parseBoolean(System.getProperty("parse-list-items", "true"));
         Boolean parseBiblioItems = Boolean.parseBoolean(System.getProperty("parse-biblio-items", "true"));
         Boolean parseCells = Boolean.parseBoolean(System.getProperty("parse-cells", "false"));
@@ -18,7 +25,10 @@ public class Main {
 
         System.out.printf("All blocks: %d%n", allBlocks.size());
 
-        String outFilePath = System.getProperty("output", "G:\\jprojects\\elibrary\\GLPS\\index.adoc");
+        String outFilePath = System.getProperty("output");
+        if (outFilePath == null) {
+            throw new IllegalArgumentException("output is a required property");
+        }
         Boolean identifyListItems = Boolean.parseBoolean(System.getProperty("id-list-items", "true"));
         Boolean identifyBiblioItems = Boolean.parseBoolean(System.getProperty("id-biblio-items", "true"));
         Boolean identifyCells = Boolean.parseBoolean(System.getProperty("id-cells", "false"));
