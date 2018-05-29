@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -43,7 +44,10 @@ class Extender {
 
         Files.copy((new File(path)).toPath(), (new File(copyPath)).toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(copyPath));
+        BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(
+                        new FileInputStream(new File(copyPath)), StandardCharsets.UTF_8));
+
         List<String> lines = new ArrayList<>();
         String nextLine;
 
@@ -94,13 +98,16 @@ class Extender {
 
         }
 
-        FileWriter fw = new FileWriter(outPath);
+        Writer out = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(new File(outPath)), StandardCharsets.UTF_8));
 
         for (String line : lines) {
-            fw.write(line + "\n");
+            out.append(line).append("\r\n");
         }
 
-        fw.close();
+        out.flush();
+        out.close();
+
         Files.delete((new File(copyPath).toPath()));
     }
 
