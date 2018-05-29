@@ -129,7 +129,7 @@ class Extender {
                                         String.format("^[ \\t]*(%s)[ \\t]+(%s)$",
                                                 Pattern.quote(extendedBlock.marker), Pattern.quote(beginText)));
 
-                                Matcher m = SimpleListRx.matcher(line);
+                                Matcher m = SimpleListRx.matcher(line.trim());
                                 if (m.matches()) {
                                     if (parentBlock.style != null && parentBlock.style.equals("bibliography")) {
                                         lines.set(line_idx, String.format("%s [[[%s]]] %s",
@@ -149,7 +149,7 @@ class Extender {
                                                 Pattern.quote(extendedBlock.term),
                                                 Pattern.quote(extendedBlock.description.split("\\r?\\n")[0])));
 
-                                Matcher m = DescriptionListRx.matcher(line);
+                                Matcher m = DescriptionListRx.matcher(line.trim());
                                 if (m.matches()) {
                                     lines.set(line_idx, String.format("[[%s]]%s", extendedBlock.id, line));
                                     extendedBlock.isIdentified = true;
