@@ -125,8 +125,9 @@ class Extender {
                         if (extendedBlock.sourceText.length() >= 7) {
                             if (extendedBlock.marker != null) { // обычный список
 
-                                Pattern SimpleListRx = Pattern.compile(String.format("^[ \\t]*(%s)[ \\t]+(%s)$",
-                                        Pattern.quote(extendedBlock.marker), Pattern.quote(beginText)));
+                                Pattern SimpleListRx = Pattern.compile(
+                                        String.format("^[ \\t]*(%s)[ \\t]+(%s)$",
+                                                Pattern.quote(extendedBlock.marker), Pattern.quote(beginText)));
 
                                 Matcher m = SimpleListRx.matcher(line);
                                 if (m.matches()) {
@@ -141,11 +142,15 @@ class Extender {
 
                                     break;
                                 }
-                            } else if (!(extendedBlock.term == null && extendedBlock.description == null)) // список определений
+                            } else if (extendedBlock.term != null && extendedBlock.description != null) // список определений
                             {
+                                Pattern DescriptionListRx = Pattern.compile(
+                                        String.format("^(?!//)[ \\t]*(%s?)(:{2,4}|;;)(?:[ \\t]+(%s))?$",
+                                                Pattern.quote(extendedBlock.term),
+                                                Pattern.quote(extendedBlock.description.split("\\r?\\n")[0])));
 
-                                if (line.startsWith(beginText)) // TODO: regex
-                                {
+                                Matcher m = DescriptionListRx.matcher(line);
+                                if (m.matches()) {
                                     lines.set(line_idx, String.format("[[%s]]%s", extendedBlock.id, line));
                                     extendedBlock.isIdentified = true;
 
