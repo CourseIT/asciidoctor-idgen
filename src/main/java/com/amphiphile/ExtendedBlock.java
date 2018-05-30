@@ -1,7 +1,7 @@
 package com.amphiphile;
 
 class ExtendedBlock {
-
+    String docTitle; // заголовок документа
     Boolean isIdentified; //идентификатор уже существует в документе
     String id; //идентификатор
     String parentId;//идентификатор родительского элемента (для списков, таблиц)

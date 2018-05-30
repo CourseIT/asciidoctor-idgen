@@ -88,7 +88,7 @@ class Lurker {
                 extendedBlock.sourceText = getTableSource((TableImpl) block);
             }
         }
-
+        extendedBlock.docTitle = block.getDocument().getDoctitle();
         allBlocks.add(extendedBlock);
 
         if (extendedBlock.context.endsWith("list") && (this.parseListItems || this.parseBiblioItems) ||
@@ -98,6 +98,7 @@ class Lurker {
             blockParams.put("id", extendedBlock.id);
             blockParams.put("style", DefaultValueHandler.getValueOrDefault(extendedBlock.style, ""));
             blockParams.put("isEmbeddedDoc", extendedBlock.isEmbeddedDoc.toString());
+            blockParams.put("docTitle", extendedBlock.docTitle);
 
             addNestedItems(block, blockParams);
         }
@@ -262,6 +263,7 @@ class Lurker {
         }
         extendedBlock.sourceText = listItem.getSource();
 
+        extendedBlock.docTitle = listItem.getDocument().getDoctitle();
         allBlocks.add(extendedBlock);
 
         if (listItem.getBlocks().size() != 0) {
@@ -295,6 +297,7 @@ class Lurker {
         extendedBlock.parentId = listParams.get("id").toString();
         extendedBlock.isEmbeddedDoc = Boolean.parseBoolean(listParams.get("isEmbeddedDoc").toString());
 
+        extendedBlock.docTitle = listParams.get("docTitle").toString();
         allBlocks.add(extendedBlock);
 
     }
@@ -368,6 +371,7 @@ class Lurker {
             extendedBlock.parentId = tableParams.get("id").toString();
             extendedBlock.isEmbeddedDoc = Boolean.parseBoolean(tableParams.get("isEmbeddedDoc").toString());
             extendedBlock.sourceText = cell.getSource();
+            extendedBlock.docTitle = cell.getDocument().getDoctitle();
             allBlocks.add(extendedBlock);
         }
     }
