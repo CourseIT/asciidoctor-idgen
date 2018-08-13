@@ -88,7 +88,9 @@ class Extender {
         if (jsonFilePath != null) {
 
             try (Writer writer = new FileWriter(jsonFilePath)) {
-                GsonBuilder gsonBuilder = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting();
+                GsonBuilder gsonBuilder = new GsonBuilder();
+//                gsonBuilder.disableHtmlEscaping();
+//                gsonBuilder.setPrettyPrinting();
                 Gson gson = gsonBuilder.create();
                 gson.toJson(allBlocks, writer);
 
