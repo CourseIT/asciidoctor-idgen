@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
+
 class Lurker {
     private static ArrayList<ExtendedBlock> allBlocks = new ArrayList<>();
     private Boolean parseListItems;
@@ -69,6 +71,7 @@ class Lurker {
 
         } else if (extendedBlock.context.equals("paragraph")) {
             extendedBlock.sourceText = ((BlockImpl) block).getSource();
+            extendedBlock.htmlText = escapeHtml4((String) block.getContent());
 
         } else if (extendedBlock.context.equals("section")) {
             extendedBlock.title = block.getTitle();
@@ -78,6 +81,7 @@ class Lurker {
 
                 if (block instanceof ListImpl) {
                     extendedBlock.sourceText = getListSource((ListImpl) block);
+                    extendedBlock.htmlText = getListHtml((ListImpl) block);
                 } else if (block instanceof DescriptionListImpl) {
                     extendedBlock.sourceText = getListSource((DescriptionListImpl) block);
                 }
@@ -148,6 +152,25 @@ class Lurker {
 
         return sourceText;
     }
+
+    private String getListHtml(ListImpl list) {
+        String htmlText = "";
+
+        for (Object listItem : list.getItems()) {
+            ListItem item = (ListItem) listItem;
+            String itemHtmlText = escapeHtml4(item.getText());
+
+            if (!htmlText.equals("")) {
+                htmlText = String.join("", htmlText, itemHtmlText);
+            } else {
+                htmlText = itemHtmlText;
+            }
+
+        }
+
+        return htmlText;
+    }
+
 
     private String getTableSource(TableImpl table) {
         String sourceText = "|===";
@@ -262,6 +285,7 @@ class Lurker {
             extendedBlock.marker = listItem.getMarker();
         }
         extendedBlock.sourceText = listItem.getSource();
+        extendedBlock.htmlText = escapeHtml4(listItem.getText());
 
         extendedBlock.docTitle = listItem.getDocument().getDoctitle();
         allBlocks.add(extendedBlock);
