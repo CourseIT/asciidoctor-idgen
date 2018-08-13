@@ -84,6 +84,7 @@ class Lurker {
                     extendedBlock.htmlText = getListHtml((ListImpl) block);
                 } else if (block instanceof DescriptionListImpl) {
                     extendedBlock.sourceText = getListSource((DescriptionListImpl) block);
+                    extendedBlock.htmlText = getListHtml((DescriptionListImpl) block);
                 }
             }
         } else if (extendedBlock.context.equals("table")) {
@@ -140,8 +141,12 @@ class Lurker {
         for (Object listItem : list.getItems()) {
             DescriptionListEntryImpl item = (DescriptionListEntryImpl) listItem;
 
+
+            ListItem term = item.getTerms().get(0);//TODO: multiple terms;
+            ListItem description = item.getDescription();
+
             String itemSourceText = String.format("%s:: %s",
-                    item.getTerms().get(0).getSource(), item.getDescription().getSource());//TODO: multiple terms
+                    term.getSource(), description.getSource());
 
             if (!sourceText.equals("")) {
                 sourceText = String.join("\n\n", sourceText, itemSourceText);
@@ -154,6 +159,29 @@ class Lurker {
     }
 
     private String getListHtml(ListImpl list) {
+        String htmlText = "";
+
+        for (Object listItem : list.getItems()) {
+            DescriptionListEntryImpl item = (DescriptionListEntryImpl) listItem;
+
+            ListItem term = item.getTerms().get(0);//TODO: multiple terms;
+            ListItem description = item.getDescription();
+
+            String itemHtmlText = String.format("%s %s",
+                    escapeHtml4(term.getText()), escapeHtml4(description.getText()));
+
+            if (!htmlText.equals("")) {
+                htmlText = String.join("", htmlText, itemHtmlText);
+            } else {
+                htmlText = itemHtmlText;
+            }
+        }
+
+        return htmlText;
+    }
+
+
+    private String getListHtml(DescriptionListImpl list) {
         String htmlText = "";
 
         for (Object listItem : list.getItems()) {
@@ -303,12 +331,17 @@ class Lurker {
 
         extendedBlock.context = "list_item";
 
-        extendedBlock.term = listItem.getTerms().get(0).getSource(); //TODO: multiple terms;
-        extendedBlock.description = listItem.getDescription().getSource();
+        ListItem term = listItem.getTerms().get(0);//TODO: multiple terms;
+        ListItem description = listItem.getDescription();
+
+        extendedBlock.term = term.getSource();
+        extendedBlock.description = description.getSource();
 
         extendedBlock.sourceText = String.format("%s:: %s",
                 extendedBlock.term, extendedBlock.description);
 
+        extendedBlock.htmlText = String.format("%s %s",
+                escapeHtml4(term.getText()), escapeHtml4(description.getText()));
         extendedBlock.id = getInlineId(extendedBlock.sourceText, listParams);
 
         if (extendedBlock.id != null) {
