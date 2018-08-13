@@ -171,7 +171,7 @@ class Lurker {
                     escapeHtml4(term.getText()), escapeHtml4(description.getText()));
 
             if (!htmlText.equals("")) {
-                htmlText = String.join("", htmlText, itemHtmlText);
+                htmlText = String.join("", htmlText, itemHtmlText); //TODO: add wrapping tags
             } else {
                 htmlText = itemHtmlText;
             }
@@ -189,7 +189,7 @@ class Lurker {
             String itemHtmlText = escapeHtml4(item.getText());
 
             if (!htmlText.equals("")) {
-                htmlText = String.join("", htmlText, itemHtmlText);
+                htmlText = String.join("", htmlText, itemHtmlText);//TODO: add wrapping tags
             } else {
                 htmlText = itemHtmlText;
             }
