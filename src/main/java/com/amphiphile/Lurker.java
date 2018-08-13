@@ -81,10 +81,10 @@ class Lurker {
 
                 if (block instanceof ListImpl) {
                     extendedBlock.sourceText = getListSource((ListImpl) block);
-                    extendedBlock.htmlText = getListHtml((ListImpl) block);
+                    extendedBlock.htmlText = block.convert();
                 } else if (block instanceof DescriptionListImpl) {
                     extendedBlock.sourceText = getListSource((DescriptionListImpl) block);
-                    extendedBlock.htmlText = getListHtml((DescriptionListImpl) block);
+                    extendedBlock.htmlText = block.convert();
                 }
             }
         } else if (extendedBlock.context.equals("table")) {
@@ -158,48 +158,6 @@ class Lurker {
 
         return sourceText;
     }
-
-    private String getListHtml(ListImpl list) {
-        String htmlText = "";
-
-        for (Object listItem : list.getItems()) {
-            DescriptionListEntryImpl item = (DescriptionListEntryImpl) listItem;
-
-            ListItem term = item.getTerms().get(0);//TODO: multiple terms;
-            ListItem description = item.getDescription();
-
-            String itemHtmlText = String.format("%s %s",
-                    escapeHtml4(term.getText()), escapeHtml4(description.getText()));
-
-            if (!htmlText.equals("")) {
-                htmlText = String.join("", htmlText, itemHtmlText); //TODO: add wrapping tags
-            } else {
-                htmlText = itemHtmlText;
-            }
-        }
-
-        return htmlText;
-    }
-
-
-    private String getListHtml(DescriptionListImpl list) {
-        String htmlText = "";
-
-        for (Object listItem : list.getItems()) {
-            ListItem item = (ListItem) listItem;
-            String itemHtmlText = escapeHtml4(item.getText());
-
-            if (!htmlText.equals("")) {
-                htmlText = String.join("", htmlText, itemHtmlText);//TODO: add wrapping tags
-            } else {
-                htmlText = itemHtmlText;
-            }
-
-        }
-
-        return htmlText;
-    }
-
 
     private String getTableSource(TableImpl table) {
         String sourceText = "|===";
