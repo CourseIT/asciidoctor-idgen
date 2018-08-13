@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
+
 class Lurker {
     private static ArrayList<ExtendedBlock> allBlocks = new ArrayList<>();
     private Boolean parseListItems;
@@ -69,6 +71,7 @@ class Lurker {
 
         } else if (extendedBlock.context.equals("paragraph")) {
             extendedBlock.sourceText = ((BlockImpl) block).getSource();
+            extendedBlock.htmlText = escapeHtml4((String) block.getContent());
 
         } else if (extendedBlock.context.equals("section")) {
             extendedBlock.title = block.getTitle();
@@ -78,14 +81,17 @@ class Lurker {
 
                 if (block instanceof ListImpl) {
                     extendedBlock.sourceText = getListSource((ListImpl) block);
+                    extendedBlock.htmlText = escapeHtml4(block.convert());
                 } else if (block instanceof DescriptionListImpl) {
                     extendedBlock.sourceText = getListSource((DescriptionListImpl) block);
+                    extendedBlock.htmlText = escapeHtml4(block.convert());
                 }
             }
         } else if (extendedBlock.context.equals("table")) {
             extendedBlock.title = block.getTitle();
             if (!this.parseCells) {
                 extendedBlock.sourceText = getTableSource((TableImpl) block);
+                extendedBlock.htmlText = escapeHtml4(block.convert());
             }
         }
         extendedBlock.docTitle = block.getDocument().getDoctitle();
@@ -136,8 +142,12 @@ class Lurker {
         for (Object listItem : list.getItems()) {
             DescriptionListEntryImpl item = (DescriptionListEntryImpl) listItem;
 
+
+            ListItem term = item.getTerms().get(0);//TODO: multiple terms;
+            ListItem description = item.getDescription();
+
             String itemSourceText = String.format("%s:: %s",
-                    item.getTerms().get(0).getSource(), item.getDescription().getSource());//TODO: multiple terms
+                    term.getSource(), description.getSource());
 
             if (!sourceText.equals("")) {
                 sourceText = String.join("\n\n", sourceText, itemSourceText);
@@ -262,6 +272,7 @@ class Lurker {
             extendedBlock.marker = listItem.getMarker();
         }
         extendedBlock.sourceText = listItem.getSource();
+        extendedBlock.htmlText = escapeHtml4(listItem.getText());
 
         extendedBlock.docTitle = listItem.getDocument().getDoctitle();
         allBlocks.add(extendedBlock);
@@ -279,12 +290,17 @@ class Lurker {
 
         extendedBlock.context = "list_item";
 
-        extendedBlock.term = listItem.getTerms().get(0).getSource(); //TODO: multiple terms;
-        extendedBlock.description = listItem.getDescription().getSource();
+        ListItem term = listItem.getTerms().get(0);//TODO: multiple terms;
+        ListItem description = listItem.getDescription();
+
+        extendedBlock.term = term.getSource();
+        extendedBlock.description = description.getSource();
 
         extendedBlock.sourceText = String.format("%s:: %s",
                 extendedBlock.term, extendedBlock.description);
 
+        extendedBlock.htmlText = String.format("%s %s",
+                escapeHtml4(term.getText()), escapeHtml4(description.getText()));
         extendedBlock.id = getInlineId(extendedBlock.sourceText, listParams);
 
         if (extendedBlock.id != null) {
@@ -371,6 +387,7 @@ class Lurker {
             extendedBlock.parentId = tableParams.get("id").toString();
             extendedBlock.isEmbeddedDoc = Boolean.parseBoolean(tableParams.get("isEmbeddedDoc").toString());
             extendedBlock.sourceText = cell.getSource();
+            extendedBlock.htmlText = escapeHtml4(cell.getText());
             extendedBlock.docTitle = cell.getDocument().getDoctitle();
             allBlocks.add(extendedBlock);
         }
@@ -383,10 +400,14 @@ class Lurker {
         this.parseCells = parseCells;
         Asciidoctor asciidoctor = Asciidoctor.Factory.create();
 
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("table-caption", "Таблица");
+
         Map<String, Object> options = OptionsBuilder.options()
                 .option("sourcemap", "true")
                 .option("catalog_assets", "true")
                 .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 4)
+                .option("attributes", attributes)
                 .asMap();
 
         Document document = asciidoctor.loadFile(new File(path), options);
