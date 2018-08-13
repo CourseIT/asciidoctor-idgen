@@ -81,17 +81,17 @@ class Lurker {
 
                 if (block instanceof ListImpl) {
                     extendedBlock.sourceText = getListSource((ListImpl) block);
-                    extendedBlock.htmlText = block.convert();
+                    extendedBlock.htmlText = escapeHtml4(block.convert());
                 } else if (block instanceof DescriptionListImpl) {
                     extendedBlock.sourceText = getListSource((DescriptionListImpl) block);
-                    extendedBlock.htmlText = block.convert();
+                    extendedBlock.htmlText = escapeHtml4(block.convert());
                 }
             }
         } else if (extendedBlock.context.equals("table")) {
             extendedBlock.title = block.getTitle();
             if (!this.parseCells) {
                 extendedBlock.sourceText = getTableSource((TableImpl) block);
-                extendedBlock.htmlText = block.convert();
+                extendedBlock.htmlText = escapeHtml4(block.convert());
             }
         }
         extendedBlock.docTitle = block.getDocument().getDoctitle();
