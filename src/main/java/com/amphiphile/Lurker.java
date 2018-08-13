@@ -91,6 +91,7 @@ class Lurker {
             extendedBlock.title = block.getTitle();
             if (!this.parseCells) {
                 extendedBlock.sourceText = getTableSource((TableImpl) block);
+                extendedBlock.htmlText = block.convert();
             }
         }
         extendedBlock.docTitle = block.getDocument().getDoctitle();
@@ -428,6 +429,7 @@ class Lurker {
             extendedBlock.parentId = tableParams.get("id").toString();
             extendedBlock.isEmbeddedDoc = Boolean.parseBoolean(tableParams.get("isEmbeddedDoc").toString());
             extendedBlock.sourceText = cell.getSource();
+            extendedBlock.htmlText = escapeHtml4(cell.getText());
             extendedBlock.docTitle = cell.getDocument().getDoctitle();
             allBlocks.add(extendedBlock);
         }
@@ -440,10 +442,14 @@ class Lurker {
         this.parseCells = parseCells;
         Asciidoctor asciidoctor = Asciidoctor.Factory.create();
 
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("table-caption", "Таблица");
+
         Map<String, Object> options = OptionsBuilder.options()
                 .option("sourcemap", "true")
                 .option("catalog_assets", "true")
                 .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 4)
+                .option("attributes", attributes)
                 .asMap();
 
         Document document = asciidoctor.loadFile(new File(path), options);
