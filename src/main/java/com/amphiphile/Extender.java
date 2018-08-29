@@ -58,8 +58,9 @@ class Extender {
 
         for (ExtendedBlock extendedBlock : allBlocks) {
             if (!extendedBlock.isIdentified && !extendedBlock.isEmbeddedDoc) {
-                if (extendedBlock.context.equals("paragraph") ||
-                        extendedBlock.context.endsWith("list") && !extendedBlock.style.equals("bibliography")) {
+                if (extendedBlock.context.equals("paragraph")
+//                        || extendedBlock.context.endsWith("list") && !extendedBlock.style.equals("bibliography")
+                ) {
                     try {
                         lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
                         shift += 1;
