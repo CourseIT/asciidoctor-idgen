@@ -56,7 +56,7 @@ class Lurker {
             extendedBlock.isIdentified = true;
         } else {
             IdGenerator idGenerator = new IdGenerator();
-            extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(4));
+            extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(5));
         }
         extendedBlock.id = extendedBlock.id.toLowerCase();
         extendedBlock.isEmbeddedDoc = isEmbeddedDoc;
@@ -261,7 +261,7 @@ class Lurker {
             extendedBlock.isIdentified = true;
         } else {
             IdGenerator idGenerator = new IdGenerator();
-            extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(4));
+            extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(5));
         }
         extendedBlock.id = extendedBlock.id.toLowerCase();
         extendedBlock.parentId = listParams.get("id").toString();
@@ -307,7 +307,7 @@ class Lurker {
             extendedBlock.isIdentified = true;
         } else {
             IdGenerator idGenerator = new IdGenerator();
-            extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(4));
+            extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(5));
         }
         extendedBlock.id = extendedBlock.id.toLowerCase();
         extendedBlock.parentId = listParams.get("id").toString();
@@ -381,7 +381,7 @@ class Lurker {
                 extendedBlock.isIdentified = true;
             } else {
                 IdGenerator idGenerator = new IdGenerator();
-                extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(4));
+                extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(5));
             }
             extendedBlock.id = extendedBlock.id.toLowerCase();
             extendedBlock.parentId = tableParams.get("id").toString();
