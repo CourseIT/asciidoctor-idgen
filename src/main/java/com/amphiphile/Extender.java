@@ -135,19 +135,26 @@ class Extender {
                             identifyBiblioItems && parentBlock.style.equals("bibliography")) {
                         if (extendedBlock.sourceText.length() >= 7) {
                             if (extendedBlock.marker != null) { // обычный список
-
-                                Pattern SimpleListRx = Pattern.compile(
-                                        String.format("^[ \\t]*(%s)[ \\t]+(%s)$",
-                                                Pattern.quote(extendedBlock.marker), Pattern.quote(beginText)));
+                                String marker = normalizeMarker(extendedBlock.marker);
+                                Pattern SimpleListRx;
+                                if (marker.equals(extendedBlock.marker)) {
+                                    SimpleListRx = Pattern.compile(
+                                            String.format("^[ \\t]*(%s)[ \\t]+(%s)$",
+                                                    Pattern.quote(marker), Pattern.quote(beginText)));
+                                } else {
+                                    SimpleListRx = Pattern.compile(
+                                            String.format("^[ \\t]*\\d*(%s)[ \\t]+(%s)$",
+                                                    Pattern.quote(marker), Pattern.quote(beginText)));
+                                }
 
                                 Matcher m = SimpleListRx.matcher(line.trim());
                                 if (m.matches()) {
                                     if (parentBlock.style != null && parentBlock.style.equals("bibliography")) {
                                         lines.set(line_idx, String.format("%s [[[%s]]] %s",
-                                                extendedBlock.marker, extendedBlock.id, extendedBlock.sourceText));
+                                                marker, extendedBlock.id, extendedBlock.sourceText));
                                     } else {
                                         lines.set(line_idx, String.format("%s [[%s]]%s",
-                                                extendedBlock.marker, extendedBlock.id, beginText));
+                                                marker, extendedBlock.id, beginText));
                                     }
                                     extendedBlock.isIdentified = true;
 
@@ -191,5 +198,17 @@ class Extender {
             }
         }
         return parentBlock;
+    }
+
+    private String normalizeMarker(String marker) {
+        String normalizedMarker = marker;
+        Pattern markerRx = Pattern.compile("^\\d+\\t*(.*)$");
+
+        Matcher m = markerRx.matcher(marker.trim());
+        if (m.matches()) {
+            normalizedMarker = m.group(1);
+        }
+
+        return normalizedMarker;
     }
 }
