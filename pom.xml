@@ -4,11 +4,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 	http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.amphiphile</groupId>
-    <artifactId>asciidoctor-parser</artifactId>
+    <groupId>ru.curs.asciidoctor_idgen</groupId>
+    <artifactId>asciidoctor-idgen</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
-    <name>asciidoctor-parser</name>
+    <name>asciidoctor-idgen</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -35,18 +35,11 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.1</version>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <!--<scope>test</scope>-->
-        </dependency>
     </dependencies>
 
     <build>
-        <finalName>asciidoctor-parser</finalName>
+        <finalName>asciidoctor-idgen</finalName>
         <plugins>
-            <!-- Set a compiler level -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -56,40 +49,36 @@
                     <target>8</target>
                 </configuration>
             </plugin>
-
-            <!-- Make this jar executable -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
-                    <excludes>
-                    </excludes>
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.amphiphile.Main</mainClass>
-                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>ru.curs.asciidoctor_idgen.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
-
-            <!-- Copy project dependency -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.1.0</version>
+                <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
                         <goals>
-                            <goal>copy-dependencies</goal>
+                            <goal>attached</goal>
                         </goals>
+                        <phase>package</phase>
                         <configuration>
-                            <!-- exclude junit, we need runtime dependency only -->
-                            <includeScope>runtime</includeScope>
-                            <outputDirectory>${project.build.directory}/lib/</outputDirectory>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>ru.curs.asciidoctor_idgen.Main</mainClass>
+                                </manifest>
+                            </archive>
                         </configuration>
                     </execution>
                 </executions>

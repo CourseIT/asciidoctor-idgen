@@ -1,4 +1,4 @@
-package com.amphiphile;
+package ru.curs.asciidoctor_idgen;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
