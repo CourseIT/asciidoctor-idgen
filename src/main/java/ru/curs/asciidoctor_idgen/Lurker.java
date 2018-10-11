@@ -1,4 +1,4 @@
-package com.amphiphile;
+package ru.curs.asciidoctor_idgen;
 
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.OptionsBuilder;

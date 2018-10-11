@@ -1,4 +1,4 @@
-package com.amphiphile;
+package ru.curs.asciidoctor_idgen;
 
 class ExtendedBlock {
     String docTitle; // заголовок документа
