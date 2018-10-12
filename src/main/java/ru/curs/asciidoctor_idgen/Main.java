@@ -20,10 +20,10 @@ public class Main {
         options.addOption("ibi", "id-biblio-items", false, "Identify bibliography list items");
         options.addOption("ic", "id-cells", false, "Identify cells");
 
+        options.addOption("ohtml", "output-html", false, "Convert output file to html");
 
         CommandLineParser parser = new DefaultParser();
         CommandLine cmdLine = parser.parse(options, args);
-
 
         String adocFilePath = cmdLine.getOptionValue("input");
 
@@ -34,7 +34,7 @@ public class Main {
         Lurker lurker = new Lurker(adocFilePath);
         ArrayList<ExtendedBlock> allBlocks = lurker.lurk(parseListItems, parseBiblioItems, parseCells);
 
-        System.out.printf("All blocks: %d%n", allBlocks.size());
+        System.out.printf("Parsed successfully. All blocks: %d%n", allBlocks.size());
 
         String outFilePath = cmdLine.getOptionValue("output");
         String jsonFilePath = cmdLine.getOptionValue("json");
@@ -46,7 +46,14 @@ public class Main {
         Extender extender = new Extender(adocFilePath, outFilePath, jsonFilePath, allBlocks);
         extender.extend(identifyListItems, identifyBiblioItems, identifyCells);
 
-        System.out.println("ycnex!");
+        System.out.println("Identified successfully.");
+
+        if (cmdLine.hasOption("ohtml")) {
+            Converter converter = new Converter(outFilePath);
+            converter.convert();
+            System.out.println("Converted successfully.");
+        }
+
 
     }
 }
