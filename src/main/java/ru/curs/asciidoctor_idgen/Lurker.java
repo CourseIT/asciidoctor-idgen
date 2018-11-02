@@ -3,7 +3,10 @@ package ru.curs.asciidoctor_idgen;
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.ast.*;
-import org.asciidoctor.ast.impl.*;
+import org.asciidoctor.ast.impl.BlockImpl;
+import org.asciidoctor.ast.impl.DescriptionListImpl;
+import org.asciidoctor.ast.impl.ListImpl;
+import org.asciidoctor.ast.impl.TableImpl;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -16,16 +19,10 @@ import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
 
 class Lurker {
     private static ArrayList<ExtendedBlock> allBlocks = new ArrayList<>();
-    private Boolean parseListItems;
-    private Boolean parseBiblioItems;
-    private Boolean parseCells;
     private String path;
 
     Lurker(String path) {
         this.path = path;
-        this.parseListItems = false;
-        this.parseBiblioItems = false;
-        this.parseCells = false;
     }
 
     private void touch(StructuralNode block, Boolean isEmbeddedDoc) {
@@ -65,40 +62,32 @@ class Lurker {
         if (block.getSourceLocation() != null) {
             extendedBlock.sourceLine = block.getSourceLocation().getLineNumber();
         }
-        if (extendedBlock.context.equals("image")) {
-            extendedBlock.target = (String) block.getAttributes().get("target");
-            extendedBlock.title = block.getTitle();
 
-        } else if (extendedBlock.context.equals("paragraph")) {
-            extendedBlock.sourceText = ((BlockImpl) block).getSource();
-            extendedBlock.htmlText = escapeHtml4((String) block.getContent());
+        switch (extendedBlock.context) {
+            case "image":
+                extendedBlock.target = (String) block.getAttributes().get("target");
+                extendedBlock.title = block.getTitle();
 
-        } else if (extendedBlock.context.equals("section")) {
-            extendedBlock.title = block.getTitle();
+                break;
+            case "paragraph":
+                extendedBlock.sourceText = ((BlockImpl) block).getSource();
+                extendedBlock.htmlText = escapeHtml4((String) block.getContent());
 
-        } else if (extendedBlock.context.endsWith("list")) {
-            if (!this.parseListItems) {
+                break;
+            case "section":
+                extendedBlock.title = block.getTitle();
 
-                if (block instanceof ListImpl) {
-                    extendedBlock.sourceText = getListSource((ListImpl) block);
-                    extendedBlock.htmlText = escapeHtml4(block.convert());
-                } else if (block instanceof DescriptionListImpl) {
-                    extendedBlock.sourceText = getListSource((DescriptionListImpl) block);
-                    extendedBlock.htmlText = escapeHtml4(block.convert());
-                }
-            }
-        } else if (extendedBlock.context.equals("table")) {
-            extendedBlock.title = block.getTitle();
-            if (!this.parseCells) {
+                break;
+            case "table":
+                extendedBlock.title = block.getTitle();
                 extendedBlock.sourceText = getTableSource((TableImpl) block);
                 extendedBlock.htmlText = escapeHtml4(block.convert());
-            }
+                break;
         }
         extendedBlock.docTitle = block.getDocument().getDoctitle();
         allBlocks.add(extendedBlock);
 
-        if (extendedBlock.context.endsWith("list") && (this.parseListItems || this.parseBiblioItems) ||
-                extendedBlock.context.equals("table") && this.parseCells) {
+        if (extendedBlock.context.endsWith("list")) {
 
             Map<String, String> blockParams = new HashMap<>();
             blockParams.put("id", extendedBlock.id);
@@ -110,53 +99,6 @@ class Lurker {
         }
 
 
-    }
-
-    private String getListSource(ListImpl list) {
-        String sourceText = "";
-
-        for (Object listItem : list.getItems()) {
-            ListItem item = (ListItem) listItem;
-            String itemSourceText = String.format("%s %s", item.getMarker(), item.getSource());
-
-            if (!sourceText.equals("")) {
-                sourceText = String.join("\n\n", sourceText, itemSourceText);
-            } else {
-                sourceText = itemSourceText;
-            }
-
-            if (item.getBlocks().size() != 0) {
-                for (StructuralNode listBlock : item.getBlocks()) {
-                    addBlock(listBlock, false);
-                }
-            }
-
-        }
-
-        return sourceText;
-    }
-
-    private String getListSource(DescriptionListImpl list) {
-        String sourceText = "";
-
-        for (Object listItem : list.getItems()) {
-            DescriptionListEntryImpl item = (DescriptionListEntryImpl) listItem;
-
-
-            ListItem term = item.getTerms().get(0);//TODO: multiple terms;
-            ListItem description = item.getDescription();
-
-            String itemSourceText = String.format("%s:: %s",
-                    term.getSource(), description.getSource());
-
-            if (!sourceText.equals("")) {
-                sourceText = String.join("\n\n", sourceText, itemSourceText);
-            } else {
-                sourceText = itemSourceText;
-            }
-        }
-
-        return sourceText;
     }
 
     private String getTableSource(TableImpl table) {
@@ -214,18 +156,15 @@ class Lurker {
     private void addNestedItems(StructuralNode block, Map blockParams) {
         if (block.getContext().endsWith("list")) {
 
-            if (this.parseListItems ||
-                    this.parseBiblioItems && blockParams.get("style").toString().equals("bibliography")) {
 
-                if (block instanceof ListImpl) {
-                    for (Object listItem : ((ListImpl) block).getItems()) {
-                        addListItem((ListItem) listItem, blockParams);
-                    }
-                } else if (block instanceof DescriptionListImpl) {
-                    for (Object listItem : ((DescriptionListImpl) block).getItems()) {
-                        addListItem((DescriptionListEntry) listItem, blockParams);
+            if (block instanceof ListImpl) {
+                for (Object listItem : ((ListImpl) block).getItems()) {
+                    addListItem((ListItem) listItem, blockParams);
+                }
+            } else if (block instanceof DescriptionListImpl) {
+                for (Object listItem : ((DescriptionListImpl) block).getItems()) {
+                    addListItem((DescriptionListEntry) listItem, blockParams);
 
-                    }
                 }
             }
 
@@ -393,11 +332,8 @@ class Lurker {
         }
     }
 
-    ArrayList<ExtendedBlock> lurk(Boolean parseListItems, boolean parseBiblioItems, Boolean parseCells) {
+    ArrayList<ExtendedBlock> lurk() {
 
-        this.parseListItems = parseListItems;
-        this.parseBiblioItems = parseBiblioItems;
-        this.parseCells = parseCells;
         Asciidoctor asciidoctor = Asciidoctor.Factory.create();
 
         Map<String, Object> attributes = new HashMap<>();

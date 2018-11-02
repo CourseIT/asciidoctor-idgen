@@ -13,77 +13,77 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class Extender {
-    private String path;
     private String outPath;
     private String jsonFilePath;
-    private Boolean identifyListItems;
-    private Boolean identifyBiblioItems;
-    private Boolean identifyCells;
+    private String copyPath;
     private ArrayList<ExtendedBlock> allBlocks;
-    private int shift = 0; //количество новых линий, которое было вставлено в документ, относительно исходного
+    private List<String> lines; //список строк файла
+    private int shift = 0; //количество новых строк, которое было вставлено в документ, относительно исходного
 
-    Extender(String path, String outPath, String jsonFilePath, ArrayList<ExtendedBlock> allBlocks) {
-        this.path = path;
+    Extender(String path, String outPath, String jsonFilePath, ArrayList<ExtendedBlock> allBlocks) throws IOException {
         this.outPath = outPath;
         this.jsonFilePath = jsonFilePath;
-        this.identifyListItems = false;
-        this.identifyBiblioItems = false;
-        this.identifyCells = false;
 
         this.allBlocks = allBlocks;
-    }
 
-    void extend(Boolean identifyListItems, Boolean identifyBiblioItems, Boolean identifyCells) throws IOException {
-
-        this.identifyListItems = identifyListItems;
-        this.identifyBiblioItems = identifyBiblioItems;
-        this.identifyCells = identifyCells;
+        this.lines = new ArrayList<>();
 
         int lastDot = path.lastIndexOf('.');
-        String copyPath = path.substring(0, lastDot) + "_copy" + path.substring(lastDot);
+        this.copyPath = path.substring(0, lastDot) + "_copy" + path.substring(lastDot);
 
-        Files.copy((new File(path)).toPath(), (new File(copyPath)).toPath(), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy((new File(path)).toPath(), (new File(this.copyPath)).toPath(), StandardCopyOption.REPLACE_EXISTING);
 
         BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(
-                        new FileInputStream(new File(copyPath)), StandardCharsets.UTF_8));
-
-        List<String> lines = new ArrayList<>();
+                        new FileInputStream(new File(this.copyPath)), StandardCharsets.UTF_8));
         String nextLine;
-
         while ((nextLine = bufferedReader.readLine()) != null) {
-            lines.add(nextLine);
+            this.lines.add(nextLine);
         }
         bufferedReader.close();
 
+    }
+
+    void extend() throws IOException {
+
+
+        int all_block_idx = 0;
         for (ExtendedBlock extendedBlock : allBlocks) {
             if (!extendedBlock.isIdentified && !extendedBlock.isEmbeddedDoc) {
                 if (extendedBlock.context.equals("paragraph")
 //                        || extendedBlock.context.endsWith("list") && !extendedBlock.style.equals("bibliography")
                 ) {
+                    int paragraphAnchorLineIdx = extendedBlock.sourceLine + shift - 1;
+                    String paragraphAnchorLine = this.lines.get(paragraphAnchorLineIdx).trim();
+
+                    if (!(extendedBlock.sourceText.startsWith(paragraphAnchorLine)) || paragraphAnchorLine.isEmpty()) {
+                        paragraphAnchorLineIdx = fixParagraphAnchorLineIdx(all_block_idx, extendedBlock, paragraphAnchorLineIdx, shift);
+                    }
+
                     try {
-                        lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
+                        this.lines.add(paragraphAnchorLineIdx, "[[" + extendedBlock.id + "]]");
                         shift += 1;
                         extendedBlock.isIdentified = true;
                     } catch (IndexOutOfBoundsException e) {
                         System.err.println(String.format("Source line: %s, Shift %s, Error message: %s", extendedBlock.sourceLine, shift, e.getMessage()));
                     }
                 } else if (extendedBlock.context.equals("image")) {
-                    lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
+                    this.lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
                     shift += 1;
                     extendedBlock.isIdentified = true;
                 } else if (extendedBlock.context.equals("table")) {
-                    lines.add(extendedBlock.sourceLine + shift - 1 - 1, "[[" + extendedBlock.id + "]]");
+                    this.lines.add(extendedBlock.sourceLine + shift - 1 - 1, "[[" + extendedBlock.id + "]]");
                     shift += 1;
                     extendedBlock.isIdentified = true;
                 } else if (extendedBlock.context.equals("cell")) {
-                    addNestedId(lines, extendedBlock);
+                    addNestedId(all_block_idx, extendedBlock);
 
                 } else if (extendedBlock.context.contains("list_item")) {
 
-                    addNestedId(lines, extendedBlock);
+                    addNestedId(all_block_idx, extendedBlock);
                 }
             }
+            all_block_idx++;
         }
 
         if (jsonFilePath != null) {
@@ -92,7 +92,7 @@ class Extender {
                     new FileOutputStream(new File(jsonFilePath)), StandardCharsets.UTF_8))) {
                 GsonBuilder gsonBuilder = new GsonBuilder();
                 gsonBuilder.disableHtmlEscaping();
-//                gsonBuilder.setPrettyPrinting();
+                gsonBuilder.setPrettyPrinting();
                 Gson gson = gsonBuilder.create();
                 gson.toJson(allBlocks, writer);
 
@@ -105,85 +105,112 @@ class Extender {
         Writer out = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream(new File(outPath)), StandardCharsets.UTF_8));
 
-        for (String line : lines) {
+        for (String line : this.lines) {
             out.append(line).append("\r\n");
         }
 
         out.flush();
         out.close();
 
-        Files.delete((new File(copyPath).toPath()));
+        Files.delete((new File(this.copyPath).toPath()));
     }
 
-    private void addNestedId(List<String> lines, ExtendedBlock extendedBlock) {
+    /**
+     * When paragraph is inside a list and escaped by +, sourceLine value is incorrect
+     * Not quite elegant solution above
+     */
+    private int fixParagraphAnchorLineIdx(int all_block_idx, ExtendedBlock extendedBlock, int paragraphAnchorLineIdx, int shift) {
+
+        int newParagraphAnchorLineIdx = paragraphAnchorLineIdx;
+
+        if (!this.lines.get(paragraphAnchorLineIdx).startsWith("include:")) {
+            ExtendedBlock prevIdentifiedBlock = getPrevIdentifiedBlock(all_block_idx, extendedBlock);
+
+            for (int line_idx = prevIdentifiedBlock.sourceLine + shift; line_idx < this.lines.size(); line_idx++) {
+                String line = this.lines.get(line_idx).trim();
+                if (!(line.isEmpty()) && extendedBlock.sourceText.startsWith(line)) {
+                    newParagraphAnchorLineIdx = line_idx;
+                    extendedBlock.sourceLine = line_idx - shift + 1;
+                    break;
+                }
+
+            }
+        }
+        return newParagraphAnchorLineIdx;
+    }
+
+    /**
+     * When paragraph is inside a list and escaped by +, sourceLine value is incorrect
+     * Not quite elegant solution above
+     */
+    private ExtendedBlock getPrevIdentifiedBlock(int all_block_idx, ExtendedBlock extendedBlock) {
+        for (int identified_block_idx = all_block_idx - 1; identified_block_idx >= 0; identified_block_idx--) {
+            ExtendedBlock prevIdentifiedBlock = allBlocks.get(identified_block_idx);
+            if (prevIdentifiedBlock.isIdentified) {
+                return prevIdentifiedBlock;
+            }
+        }
+        return extendedBlock;
+    }
+
+    private void addNestedId(int all_block_idx, ExtendedBlock extendedBlock) {
 
         if (!(extendedBlock.sourceText.equals(""))) {
             String beginText = extendedBlock.sourceText.split("\\r?\\n")[0];
             ExtendedBlock parentBlock = getParentBlock(extendedBlock);
-//            int startIdx = DefaultValueHandler.getValueOrDefault(parentBlock.sourceLine, 0);
-//
-//            if (extendedBlock.marker != null && extendedBlock.marker.length() >= 2) {
-//                startIdx = 1;// для вложенных листов неправильно работает sourceline
-//            }
-            int startIdx = 1;
-            for (int line_idx = startIdx + shift - 1; line_idx < lines.size(); line_idx++) {
-                String line = lines.get(line_idx).trim();
+            ExtendedBlock prevIdentifiedBlock = getPrevIdentifiedBlock(all_block_idx, extendedBlock);
+
+            for (int line_idx = prevIdentifiedBlock.sourceLine + shift; line_idx < this.lines.size(); line_idx++) {
+                String line = this.lines.get(line_idx).trim();
 
                 if (extendedBlock.context.contains("list_item")) {
 
-                    if (identifyListItems ||
-                            identifyBiblioItems && parentBlock.style.equals("bibliography")) {
-                        if (extendedBlock.sourceText.length() >= 7) {
-                            if (extendedBlock.marker != null) { // обычный список
-                                String marker = normalizeMarker(extendedBlock.marker);
-                                Pattern SimpleListRx;
-                                if (marker.equals(extendedBlock.marker)) {
-                                    SimpleListRx = Pattern.compile(
-                                            String.format("^[ \\t]*(%s)[ \\t]+(%s)$",
-                                                    Pattern.quote(marker), Pattern.quote(beginText)));
+                    if (extendedBlock.sourceText.length() >= 3) {
+                        if (extendedBlock.marker != null) { // обычный список
+                            String marker = normalizeMarker(extendedBlock.marker);
+                            Pattern SimpleListRx;
+                            if (marker.equals(extendedBlock.marker)) {
+                                SimpleListRx = Pattern.compile(
+                                        String.format("^[ \\t]*(%s)[ \\t]+(%s)$",
+                                                Pattern.quote(marker), Pattern.quote(beginText)));
+                            } else {
+                                SimpleListRx = Pattern.compile(
+                                        String.format("^[ \\t]*\\d*(%s)[ \\t]+(%s)$",
+                                                Pattern.quote(marker), Pattern.quote(beginText)));
+                            }
+
+                            Matcher m = SimpleListRx.matcher(line.trim());
+                            if (m.matches()) {
+                                if (parentBlock.style != null && parentBlock.style.equals("bibliography")) {
+                                    this.lines.set(line_idx, String.format("%s [[[%s]]] %s",
+                                            marker, extendedBlock.id, extendedBlock.sourceText));
                                 } else {
-                                    SimpleListRx = Pattern.compile(
-                                            String.format("^[ \\t]*\\d*(%s)[ \\t]+(%s)$",
-                                                    Pattern.quote(marker), Pattern.quote(beginText)));
+                                    this.lines.set(line_idx, String.format("%s [[%s]]%s",
+                                            marker, extendedBlock.id, beginText));
                                 }
+                                extendedBlock.sourceLine = line_idx - shift + 1;
+                                extendedBlock.isIdentified = true;
 
-                                Matcher m = SimpleListRx.matcher(line.trim());
-                                if (m.matches()) {
-                                    if (parentBlock.style != null && parentBlock.style.equals("bibliography")) {
-                                        lines.set(line_idx, String.format("%s [[[%s]]] %s",
-                                                marker, extendedBlock.id, extendedBlock.sourceText));
-                                    } else {
-                                        lines.set(line_idx, String.format("%s [[%s]]%s",
-                                                marker, extendedBlock.id, beginText));
-                                    }
-                                    extendedBlock.isIdentified = true;
+                                break;
+                            }
+                        } else if (extendedBlock.term != null && extendedBlock.description != null) // список определений
+                        {
+                            Pattern DescriptionListRx = Pattern.compile(
+                                    String.format("^(?!//)[ \\t]*(%s?)(:{2,4}|;;)(?:[ \\t]+(%s))?$",
+                                            Pattern.quote(extendedBlock.term),
+                                            Pattern.quote(extendedBlock.description.split("\\r?\\n")[0])));
 
-                                    break;
-                                }
-                            } else if (extendedBlock.term != null && extendedBlock.description != null) // список определений
-                            {
-                                Pattern DescriptionListRx = Pattern.compile(
-                                        String.format("^(?!//)[ \\t]*(%s?)(:{2,4}|;;)(?:[ \\t]+(%s))?$",
-                                                Pattern.quote(extendedBlock.term),
-                                                Pattern.quote(extendedBlock.description.split("\\r?\\n")[0])));
+                            Matcher m = DescriptionListRx.matcher(line.trim());
+                            if (m.matches()) {
+                                this.lines.set(line_idx, String.format("[[%s]]%s", extendedBlock.id, line));
+                                extendedBlock.sourceLine = line_idx - shift + 1;
+                                extendedBlock.isIdentified = true;
 
-                                Matcher m = DescriptionListRx.matcher(line.trim());
-                                if (m.matches()) {
-                                    lines.set(line_idx, String.format("[[%s]]%s", extendedBlock.id, line));
-                                    extendedBlock.isIdentified = true;
-
-                                    break;
-                                }
+                                break;
                             }
                         }
                     }
-                } else if (extendedBlock.context.equals("cell") && identifyCells)
-                    //FIXME: уточнить поиск на дубликаты, а также на простые строки (например, "1")
-                    if (line.contains(beginText)) {
-                        lines.set(line_idx, line.replaceAll(beginText, String.format("[[%s]]%s", extendedBlock.id, beginText)));
-                        extendedBlock.isIdentified = true;
-                        break;
-                    }
+                }
             }
         }
 
