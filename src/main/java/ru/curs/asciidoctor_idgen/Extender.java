@@ -76,11 +76,11 @@ class Extender {
                     shift += 1;
                     extendedBlock.isIdentified = true;
                 } else if (extendedBlock.context.equals("cell")) {
-                    addNestedId(lines, extendedBlock);
+                    addNestedId(all_block_idx, extendedBlock);
 
                 } else if (extendedBlock.context.contains("list_item")) {
 
-                    addNestedId(lines, extendedBlock);
+                    addNestedId(all_block_idx, extendedBlock);
                 }
             }
             all_block_idx++;
@@ -115,24 +115,57 @@ class Extender {
         Files.delete((new File(this.copyPath).toPath()));
     }
 
-    private void addNestedId(List<String> lines, ExtendedBlock extendedBlock) {
+    /**
+     * When paragraph is inside a list and escaped by +, sourceLine value is incorrect
+     * Not quite elegant solution above
+     */
+    private int fixParagraphAnchorLineIdx(int all_block_idx, ExtendedBlock extendedBlock, int paragraphAnchorLineIdx, int shift) {
+
+        int newParagraphAnchorLineIdx = paragraphAnchorLineIdx;
+
+        if (!this.lines.get(paragraphAnchorLineIdx).startsWith("include:")) {
+            ExtendedBlock prevIdentifiedBlock = getPrevIdentifiedBlock(all_block_idx, extendedBlock);
+
+            for (int line_idx = prevIdentifiedBlock.sourceLine + shift; line_idx < this.lines.size(); line_idx++) {
+                String line = this.lines.get(line_idx).trim();
+                if (!(line.isEmpty()) && extendedBlock.sourceText.startsWith(line)) {
+                    newParagraphAnchorLineIdx = line_idx;
+                    extendedBlock.sourceLine = line_idx - shift + 1;
+                    break;
+                }
+
+            }
+        }
+        return newParagraphAnchorLineIdx;
+    }
+
+    /**
+     * When paragraph is inside a list and escaped by +, sourceLine value is incorrect
+     * Not quite elegant solution above
+     */
+    private ExtendedBlock getPrevIdentifiedBlock(int all_block_idx, ExtendedBlock extendedBlock) {
+        for (int identified_block_idx = all_block_idx - 1; identified_block_idx >= 0; identified_block_idx--) {
+            ExtendedBlock prevIdentifiedBlock = allBlocks.get(identified_block_idx);
+            if (prevIdentifiedBlock.isIdentified) {
+                return prevIdentifiedBlock;
+            }
+        }
+        return extendedBlock;
+    }
+
+    private void addNestedId(int all_block_idx, ExtendedBlock extendedBlock) {
 
         if (!(extendedBlock.sourceText.equals(""))) {
             String beginText = extendedBlock.sourceText.split("\\r?\\n")[0];
             ExtendedBlock parentBlock = getParentBlock(extendedBlock);
-//            int startIdx = DefaultValueHandler.getValueOrDefault(parentBlock.sourceLine, 0);
-//
-//            if (extendedBlock.marker != null && extendedBlock.marker.length() >= 2) {
-//                startIdx = 1;// для вложенных листов неправильно работает sourceline
-//            }
-            int startIdx = 1;
-            for (int line_idx = startIdx + shift - 1; line_idx < lines.size(); line_idx++) {
-                String line = lines.get(line_idx).trim();
+            ExtendedBlock prevIdentifiedBlock = getPrevIdentifiedBlock(all_block_idx, extendedBlock);
+
+            for (int line_idx = prevIdentifiedBlock.sourceLine + shift; line_idx < this.lines.size(); line_idx++) {
+                String line = this.lines.get(line_idx).trim();
 
                 if (extendedBlock.context.contains("list_item")) {
 
-
-                    if (extendedBlock.sourceText.length() >= 7) {
+                    if (extendedBlock.sourceText.length() >= 3) {
                         if (extendedBlock.marker != null) { // обычный список
                             String marker = normalizeMarker(extendedBlock.marker);
                             Pattern SimpleListRx;
