@@ -54,10 +54,16 @@ class Extender {
 //                        || extendedBlock.context.endsWith("list") && !extendedBlock.style.equals("bibliography")
                 ) {
                     int paragraphAnchorLineIdx = extendedBlock.sourceLine + shift - 1;
-                    String paragraphAnchorLine = this.lines.get(paragraphAnchorLineIdx).trim();
+                    String paragraphAnchorLine = "";
+                    if (paragraphAnchorLineIdx <= this.lines.size() - 1) {
+                        paragraphAnchorLine = this.lines.get(paragraphAnchorLineIdx).trim();
+                    }
 
                     if (!(extendedBlock.sourceText.startsWith(paragraphAnchorLine)) || paragraphAnchorLine.isEmpty()) {
-                        paragraphAnchorLineIdx = fixParagraphAnchorLineIdx(all_block_idx, extendedBlock, paragraphAnchorLineIdx, shift);
+
+                        if (!paragraphAnchorLine.startsWith("include:")) {
+                            paragraphAnchorLineIdx = fixParagraphAnchorLineIdx(all_block_idx, extendedBlock, paragraphAnchorLineIdx, shift);
+                        }
                     }
 
                     try {
@@ -123,18 +129,16 @@ class Extender {
 
         int newParagraphAnchorLineIdx = paragraphAnchorLineIdx;
 
-        if (!this.lines.get(paragraphAnchorLineIdx).startsWith("include:")) {
-            ExtendedBlock prevIdentifiedBlock = getPrevIdentifiedBlock(all_block_idx, extendedBlock);
+        ExtendedBlock prevIdentifiedBlock = getPrevIdentifiedBlock(all_block_idx, extendedBlock);
 
-            for (int line_idx = prevIdentifiedBlock.sourceLine + shift; line_idx < this.lines.size(); line_idx++) {
-                String line = this.lines.get(line_idx).trim();
-                if (!(line.isEmpty()) && extendedBlock.sourceText.startsWith(line)) {
-                    newParagraphAnchorLineIdx = line_idx;
-                    extendedBlock.sourceLine = line_idx - shift + 1;
-                    break;
-                }
-
+        for (int line_idx = prevIdentifiedBlock.sourceLine + shift; line_idx < this.lines.size(); line_idx++) {
+            String line = this.lines.get(line_idx).trim();
+            if (!(line.isEmpty()) && extendedBlock.sourceText.startsWith(line)) {
+                newParagraphAnchorLineIdx = line_idx;
+                extendedBlock.sourceLine = line_idx - shift + 1;
+                break;
             }
+
         }
         return newParagraphAnchorLineIdx;
     }
