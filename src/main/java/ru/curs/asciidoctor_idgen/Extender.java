@@ -13,57 +13,66 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class Extender {
-    private String path;
     private String outPath;
     private String jsonFilePath;
+    private String copyPath;
     private ArrayList<ExtendedBlock> allBlocks;
-    private int shift = 0; //количество новых линий, которое было вставлено в документ, относительно исходного
+    private List<String> lines; //список строк файла
+    private int shift = 0; //количество новых строк, которое было вставлено в документ, относительно исходного
 
-    Extender(String path, String outPath, String jsonFilePath, ArrayList<ExtendedBlock> allBlocks) {
-        this.path = path;
+    Extender(String path, String outPath, String jsonFilePath, ArrayList<ExtendedBlock> allBlocks) throws IOException {
         this.outPath = outPath;
         this.jsonFilePath = jsonFilePath;
 
         this.allBlocks = allBlocks;
+
+        this.lines = new ArrayList<>();
+
+        int lastDot = path.lastIndexOf('.');
+        this.copyPath = path.substring(0, lastDot) + "_copy" + path.substring(lastDot);
+
+        Files.copy((new File(path)).toPath(), (new File(this.copyPath)).toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+        BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(
+                        new FileInputStream(new File(this.copyPath)), StandardCharsets.UTF_8));
+        String nextLine;
+        while ((nextLine = bufferedReader.readLine()) != null) {
+            this.lines.add(nextLine);
+        }
+        bufferedReader.close();
+
     }
 
     void extend() throws IOException {
 
-        int lastDot = path.lastIndexOf('.');
-        String copyPath = path.substring(0, lastDot) + "_copy" + path.substring(lastDot);
 
-        Files.copy((new File(path)).toPath(), (new File(copyPath)).toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-        BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(
-                        new FileInputStream(new File(copyPath)), StandardCharsets.UTF_8));
-
-        List<String> lines = new ArrayList<>();
-        String nextLine;
-
-        while ((nextLine = bufferedReader.readLine()) != null) {
-            lines.add(nextLine);
-        }
-        bufferedReader.close();
-
+        int all_block_idx = 0;
         for (ExtendedBlock extendedBlock : allBlocks) {
             if (!extendedBlock.isIdentified && !extendedBlock.isEmbeddedDoc) {
                 if (extendedBlock.context.equals("paragraph")
 //                        || extendedBlock.context.endsWith("list") && !extendedBlock.style.equals("bibliography")
                 ) {
+                    int paragraphAnchorLineIdx = extendedBlock.sourceLine + shift - 1;
+                    String paragraphAnchorLine = this.lines.get(paragraphAnchorLineIdx).trim();
+
+                    if (!(extendedBlock.sourceText.startsWith(paragraphAnchorLine)) || paragraphAnchorLine.isEmpty()) {
+                        paragraphAnchorLineIdx = fixParagraphAnchorLineIdx(all_block_idx, extendedBlock, paragraphAnchorLineIdx, shift);
+                    }
+
                     try {
-                        lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
+                        this.lines.add(paragraphAnchorLineIdx, "[[" + extendedBlock.id + "]]");
                         shift += 1;
                         extendedBlock.isIdentified = true;
                     } catch (IndexOutOfBoundsException e) {
                         System.err.println(String.format("Source line: %s, Shift %s, Error message: %s", extendedBlock.sourceLine, shift, e.getMessage()));
                     }
                 } else if (extendedBlock.context.equals("image")) {
-                    lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
+                    this.lines.add(extendedBlock.sourceLine + shift - 1, "[[" + extendedBlock.id + "]]");
                     shift += 1;
                     extendedBlock.isIdentified = true;
                 } else if (extendedBlock.context.equals("table")) {
-                    lines.add(extendedBlock.sourceLine + shift - 1 - 1, "[[" + extendedBlock.id + "]]");
+                    this.lines.add(extendedBlock.sourceLine + shift - 1 - 1, "[[" + extendedBlock.id + "]]");
                     shift += 1;
                     extendedBlock.isIdentified = true;
                 } else if (extendedBlock.context.equals("cell")) {
@@ -74,6 +83,7 @@ class Extender {
                     addNestedId(lines, extendedBlock);
                 }
             }
+            all_block_idx++;
         }
 
         if (jsonFilePath != null) {
@@ -82,7 +92,7 @@ class Extender {
                     new FileOutputStream(new File(jsonFilePath)), StandardCharsets.UTF_8))) {
                 GsonBuilder gsonBuilder = new GsonBuilder();
                 gsonBuilder.disableHtmlEscaping();
-//                gsonBuilder.setPrettyPrinting();
+                gsonBuilder.setPrettyPrinting();
                 Gson gson = gsonBuilder.create();
                 gson.toJson(allBlocks, writer);
 
@@ -95,14 +105,14 @@ class Extender {
         Writer out = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream(new File(outPath)), StandardCharsets.UTF_8));
 
-        for (String line : lines) {
+        for (String line : this.lines) {
             out.append(line).append("\r\n");
         }
 
         out.flush();
         out.close();
 
-        Files.delete((new File(copyPath).toPath()));
+        Files.delete((new File(this.copyPath).toPath()));
     }
 
     private void addNestedId(List<String> lines, ExtendedBlock extendedBlock) {
@@ -139,12 +149,13 @@ class Extender {
                             Matcher m = SimpleListRx.matcher(line.trim());
                             if (m.matches()) {
                                 if (parentBlock.style != null && parentBlock.style.equals("bibliography")) {
-                                    lines.set(line_idx, String.format("%s [[[%s]]] %s",
+                                    this.lines.set(line_idx, String.format("%s [[[%s]]] %s",
                                             marker, extendedBlock.id, extendedBlock.sourceText));
                                 } else {
-                                    lines.set(line_idx, String.format("%s [[%s]]%s",
+                                    this.lines.set(line_idx, String.format("%s [[%s]]%s",
                                             marker, extendedBlock.id, beginText));
                                 }
+                                extendedBlock.sourceLine = line_idx - shift + 1;
                                 extendedBlock.isIdentified = true;
 
                                 break;
@@ -158,7 +169,8 @@ class Extender {
 
                             Matcher m = DescriptionListRx.matcher(line.trim());
                             if (m.matches()) {
-                                lines.set(line_idx, String.format("[[%s]]%s", extendedBlock.id, line));
+                                this.lines.set(line_idx, String.format("[[%s]]%s", extendedBlock.id, line));
+                                extendedBlock.sourceLine = line_idx - shift + 1;
                                 extendedBlock.isIdentified = true;
 
                                 break;
