@@ -16,9 +16,6 @@ class Extender {
     private String path;
     private String outPath;
     private String jsonFilePath;
-    private Boolean identifyListItems;
-    private Boolean identifyBiblioItems;
-    private Boolean identifyCells;
     private ArrayList<ExtendedBlock> allBlocks;
     private int shift = 0; //количество новых линий, которое было вставлено в документ, относительно исходного
 
@@ -26,18 +23,11 @@ class Extender {
         this.path = path;
         this.outPath = outPath;
         this.jsonFilePath = jsonFilePath;
-        this.identifyListItems = false;
-        this.identifyBiblioItems = false;
-        this.identifyCells = false;
 
         this.allBlocks = allBlocks;
     }
 
-    void extend(Boolean identifyListItems, Boolean identifyBiblioItems, Boolean identifyCells) throws IOException {
-
-        this.identifyListItems = identifyListItems;
-        this.identifyBiblioItems = identifyBiblioItems;
-        this.identifyCells = identifyCells;
+    void extend() throws IOException {
 
         int lastDot = path.lastIndexOf('.');
         String copyPath = path.substring(0, lastDot) + "_copy" + path.substring(lastDot);
@@ -131,59 +121,51 @@ class Extender {
 
                 if (extendedBlock.context.contains("list_item")) {
 
-                    if (identifyListItems ||
-                            identifyBiblioItems && parentBlock.style.equals("bibliography")) {
-                        if (extendedBlock.sourceText.length() >= 7) {
-                            if (extendedBlock.marker != null) { // обычный список
-                                String marker = normalizeMarker(extendedBlock.marker);
-                                Pattern SimpleListRx;
-                                if (marker.equals(extendedBlock.marker)) {
-                                    SimpleListRx = Pattern.compile(
-                                            String.format("^[ \\t]*(%s)[ \\t]+(%s)$",
-                                                    Pattern.quote(marker), Pattern.quote(beginText)));
+
+                    if (extendedBlock.sourceText.length() >= 7) {
+                        if (extendedBlock.marker != null) { // обычный список
+                            String marker = normalizeMarker(extendedBlock.marker);
+                            Pattern SimpleListRx;
+                            if (marker.equals(extendedBlock.marker)) {
+                                SimpleListRx = Pattern.compile(
+                                        String.format("^[ \\t]*(%s)[ \\t]+(%s)$",
+                                                Pattern.quote(marker), Pattern.quote(beginText)));
+                            } else {
+                                SimpleListRx = Pattern.compile(
+                                        String.format("^[ \\t]*\\d*(%s)[ \\t]+(%s)$",
+                                                Pattern.quote(marker), Pattern.quote(beginText)));
+                            }
+
+                            Matcher m = SimpleListRx.matcher(line.trim());
+                            if (m.matches()) {
+                                if (parentBlock.style != null && parentBlock.style.equals("bibliography")) {
+                                    lines.set(line_idx, String.format("%s [[[%s]]] %s",
+                                            marker, extendedBlock.id, extendedBlock.sourceText));
                                 } else {
-                                    SimpleListRx = Pattern.compile(
-                                            String.format("^[ \\t]*\\d*(%s)[ \\t]+(%s)$",
-                                                    Pattern.quote(marker), Pattern.quote(beginText)));
+                                    lines.set(line_idx, String.format("%s [[%s]]%s",
+                                            marker, extendedBlock.id, beginText));
                                 }
+                                extendedBlock.isIdentified = true;
 
-                                Matcher m = SimpleListRx.matcher(line.trim());
-                                if (m.matches()) {
-                                    if (parentBlock.style != null && parentBlock.style.equals("bibliography")) {
-                                        lines.set(line_idx, String.format("%s [[[%s]]] %s",
-                                                marker, extendedBlock.id, extendedBlock.sourceText));
-                                    } else {
-                                        lines.set(line_idx, String.format("%s [[%s]]%s",
-                                                marker, extendedBlock.id, beginText));
-                                    }
-                                    extendedBlock.isIdentified = true;
+                                break;
+                            }
+                        } else if (extendedBlock.term != null && extendedBlock.description != null) // список определений
+                        {
+                            Pattern DescriptionListRx = Pattern.compile(
+                                    String.format("^(?!//)[ \\t]*(%s?)(:{2,4}|;;)(?:[ \\t]+(%s))?$",
+                                            Pattern.quote(extendedBlock.term),
+                                            Pattern.quote(extendedBlock.description.split("\\r?\\n")[0])));
 
-                                    break;
-                                }
-                            } else if (extendedBlock.term != null && extendedBlock.description != null) // список определений
-                            {
-                                Pattern DescriptionListRx = Pattern.compile(
-                                        String.format("^(?!//)[ \\t]*(%s?)(:{2,4}|;;)(?:[ \\t]+(%s))?$",
-                                                Pattern.quote(extendedBlock.term),
-                                                Pattern.quote(extendedBlock.description.split("\\r?\\n")[0])));
+                            Matcher m = DescriptionListRx.matcher(line.trim());
+                            if (m.matches()) {
+                                lines.set(line_idx, String.format("[[%s]]%s", extendedBlock.id, line));
+                                extendedBlock.isIdentified = true;
 
-                                Matcher m = DescriptionListRx.matcher(line.trim());
-                                if (m.matches()) {
-                                    lines.set(line_idx, String.format("[[%s]]%s", extendedBlock.id, line));
-                                    extendedBlock.isIdentified = true;
-
-                                    break;
-                                }
+                                break;
                             }
                         }
                     }
-                } else if (extendedBlock.context.equals("cell") && identifyCells)
-                    //FIXME: уточнить поиск на дубликаты, а также на простые строки (например, "1")
-                    if (line.contains(beginText)) {
-                        lines.set(line_idx, line.replaceAll(beginText, String.format("[[%s]]%s", extendedBlock.id, beginText)));
-                        extendedBlock.isIdentified = true;
-                        break;
-                    }
+                }
             }
         }
 
