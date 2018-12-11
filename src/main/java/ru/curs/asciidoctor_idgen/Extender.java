@@ -174,9 +174,16 @@ class Extender {
                             String marker = normalizeMarker(extendedBlock.marker);
                             Pattern SimpleListRx;
                             if (marker.equals(extendedBlock.marker)) {
-                                SimpleListRx = Pattern.compile(
-                                        String.format("^[ \\t]*(%s)[ \\t]+(%s)$",
-                                                Pattern.quote(marker), Pattern.quote(beginText)));
+                                if (Character.isLetter(marker.charAt(0))) {
+                                    SimpleListRx = Pattern.compile(
+                                            String.format("^[ \\t]*\\p{Alpha}(%s)[ \\t]+(%s)$",
+                                                    Pattern.quote(marker.substring(marker.length() - 1)), Pattern.quote(beginText)));
+
+                                } else {
+                                    SimpleListRx = Pattern.compile(
+                                            String.format("^[ \\t]*(%s)[ \\t]+(%s)$",
+                                                    Pattern.quote(marker), Pattern.quote(beginText)));
+                                }
                             } else {
                                 SimpleListRx = Pattern.compile(
                                         String.format("^[ \\t]*\\d*(%s)[ \\t]+(%s)$",
