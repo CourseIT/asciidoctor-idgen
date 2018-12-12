@@ -49,13 +49,7 @@ class Lurker {
         extendedBlock.context = block.getContext();
         extendedBlock.id = block.getId();
 
-        if (extendedBlock.id != null) {
-            extendedBlock.isIdentified = true;
-        } else {
-            IdGenerator idGenerator = new IdGenerator();
-            extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(5));
-        }
-        extendedBlock.id = extendedBlock.id.toLowerCase();
+        identify(extendedBlock);
         extendedBlock.isEmbeddedDoc = isEmbeddedDoc;
         extendedBlock.style = (String) DefaultValueHandler.getValueOrDefault(block.getAttributes().get("style"), "");
 
@@ -196,13 +190,7 @@ class Lurker {
         extendedBlock.context = listItem.getContext();
         extendedBlock.id = getInlineId(listItem.getSource(), listParams);
 
-        if (extendedBlock.id != null) {
-            extendedBlock.isIdentified = true;
-        } else {
-            IdGenerator idGenerator = new IdGenerator();
-            extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(5));
-        }
-        extendedBlock.id = extendedBlock.id.toLowerCase();
+        identify(extendedBlock);
         extendedBlock.parentId = listParams.get("id").toString();
         extendedBlock.isEmbeddedDoc = Boolean.parseBoolean(listParams.get("isEmbeddedDoc").toString());
         if (listItem.getSourceLocation() != null) {
@@ -224,6 +212,16 @@ class Lurker {
 
     }
 
+    private void identify(ExtendedBlock extendedBlock) {
+        if (extendedBlock.id != null) {
+            extendedBlock.isIdentified = true;
+        } else {
+            IdGenerator idGenerator = new IdGenerator();
+            extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(5));
+        }
+        extendedBlock.id = extendedBlock.id.toLowerCase();
+    }
+
     private void addListItem(DescriptionListEntry listItem, Map listParams) {
         ExtendedBlock extendedBlock = new ExtendedBlock();
 
@@ -242,13 +240,7 @@ class Lurker {
                 escapeHtml4(term.getText()), escapeHtml4(description.getText()));
         extendedBlock.id = getInlineId(extendedBlock.sourceText, listParams);
 
-        if (extendedBlock.id != null) {
-            extendedBlock.isIdentified = true;
-        } else {
-            IdGenerator idGenerator = new IdGenerator();
-            extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(5));
-        }
-        extendedBlock.id = extendedBlock.id.toLowerCase();
+        identify(extendedBlock);
         extendedBlock.parentId = listParams.get("id").toString();
         extendedBlock.isEmbeddedDoc = Boolean.parseBoolean(listParams.get("isEmbeddedDoc").toString());
 
@@ -316,13 +308,7 @@ class Lurker {
             extendedBlock.context = cell.getContext();
             extendedBlock.id = getInlineId(cell.getSource(), tableParams);
 
-            if (extendedBlock.id != null) {
-                extendedBlock.isIdentified = true;
-            } else {
-                IdGenerator idGenerator = new IdGenerator();
-                extendedBlock.id = String.join("_", extendedBlock.context, idGenerator.generateId(5));
-            }
-            extendedBlock.id = extendedBlock.id.toLowerCase();
+            identify(extendedBlock);
             extendedBlock.parentId = tableParams.get("id").toString();
             extendedBlock.isEmbeddedDoc = Boolean.parseBoolean(tableParams.get("isEmbeddedDoc").toString());
             extendedBlock.sourceText = cell.getSource();
@@ -331,6 +317,7 @@ class Lurker {
             allBlocks.add(extendedBlock);
         }
     }
+
 
     ArrayList<ExtendedBlock> lurk() {
 

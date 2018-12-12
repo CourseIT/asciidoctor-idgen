@@ -54,17 +54,15 @@ class Extender {
 //                        || extendedBlock.context.endsWith("list") && !extendedBlock.style.equals("bibliography")
                 ) {
                     int paragraphAnchorLineIdx = extendedBlock.sourceLine + shift - 1;
-                    String paragraphAnchorLine = "";
-                    if (paragraphAnchorLineIdx <= this.lines.size() - 1) {
-                        paragraphAnchorLine = this.lines.get(paragraphAnchorLineIdx).trim();
-                    }
+//                    String paragraphAnchorLine = "";
+//                    if (paragraphAnchorLineIdx <= this.lines.size() - 1) {
+//                        paragraphAnchorLine = this.lines.get(paragraphAnchorLineIdx).trim();
+//                    }
 
-                    if (!(extendedBlock.sourceText.startsWith(paragraphAnchorLine)) || paragraphAnchorLine.isEmpty()) {
+//                    if (!(extendedBlock.sourceText.startsWith(paragraphAnchorLine)) || paragraphAnchorLine.isEmpty()) {
 
-                        if (!paragraphAnchorLine.startsWith("include:")) {
-                            paragraphAnchorLineIdx = fixParagraphAnchorLineIdx(all_block_idx, extendedBlock, paragraphAnchorLineIdx, shift);
-                        }
-                    }
+                    paragraphAnchorLineIdx = fixParagraphAnchorLineIdx(all_block_idx, extendedBlock, paragraphAnchorLineIdx, shift);
+//                    }
 
                     try {
                         this.lines.add(paragraphAnchorLineIdx, "[[" + extendedBlock.id + "]]");
@@ -143,10 +141,6 @@ class Extender {
         return newParagraphAnchorLineIdx;
     }
 
-    /**
-     * When paragraph is inside a list and escaped by +, sourceLine value is incorrect
-     * Not quite elegant solution above
-     */
     private ExtendedBlock getPrevIdentifiedBlock(int all_block_idx, ExtendedBlock extendedBlock) {
         for (int identified_block_idx = all_block_idx - 1; identified_block_idx >= 0; identified_block_idx--) {
             ExtendedBlock prevIdentifiedBlock = allBlocks.get(identified_block_idx);
@@ -174,9 +168,16 @@ class Extender {
                             String marker = normalizeMarker(extendedBlock.marker);
                             Pattern SimpleListRx;
                             if (marker.equals(extendedBlock.marker)) {
-                                SimpleListRx = Pattern.compile(
-                                        String.format("^[ \\t]*(%s)[ \\t]+(%s)$",
-                                                Pattern.quote(marker), Pattern.quote(beginText)));
+                                if (Character.isLetter(marker.charAt(0))) {
+                                    SimpleListRx = Pattern.compile(
+                                            String.format("^[ \\t]*\\p{Alpha}(%s)[ \\t]+(%s)$",
+                                                    Pattern.quote(marker.substring(marker.length() - 1)), Pattern.quote(beginText)));
+
+                                } else {
+                                    SimpleListRx = Pattern.compile(
+                                            String.format("^[ \\t]*(%s)[ \\t]+(%s)$",
+                                                    Pattern.quote(marker), Pattern.quote(beginText)));
+                                }
                             } else {
                                 SimpleListRx = Pattern.compile(
                                         String.format("^[ \\t]*\\d*(%s)[ \\t]+(%s)$",
