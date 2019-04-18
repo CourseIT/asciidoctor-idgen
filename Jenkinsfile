@@ -62,40 +62,21 @@ node {
            // step( [ $class: 'JacocoPublisher', execPattern: 'target/jacoco.exec' ] )
            // checkstyle pattern: 'target/checkstyle-result.xml'
         }
-
-        if (isRelease) {
-            stage ('Publish build info') {
-                server.publishBuildInfo buildInfo
-            }
-
-            stage ('Update repository') {
-                sh '''git add .'''
-
-                def commitReleaseScript = "git commit -m \"updating poms for " + releaseVersion + " release [ci skip]\""
-                sh commitReleaseScript
-                def tagScript = "git tag " + releaseVersion
-                sh tagScript
-
-                def splittedVersion = releaseVersion.split('\\.')
-                splittedVersion[2] = (splittedVersion[2].toInteger() + 1) as String
-                def newSnapshotVersion = splittedVersion.join('.') + '-SNAPSHOT'
-                descriptor.version = newSnapshotVersion
-                descriptor.failOnSnapshot = false
-                descriptor.transform()
-
-                sh '''git add .'''
-                def commitSnapshotScript = "git commit -m \"updating poms for " + newSnapshotVersion + " development [ci skip]\""
-                sh commitSnapshotScript
-
-                withCredentials([usernamePassword(credentialsId: 'curs-jenkins-bot', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                    def repoUrl = sh(returnStdout: true, script: 'git config remote.origin.url').trim().substring(8)
-                    def pushUrl = 'https://' + GIT_USERNAME + ':' + GIT_PASSWORD + '@' + repoUrl
-
-                    sh "git push $pushUrl master"
-                    sh "git push $pushUrl --tags"
-                }
-
-            }
+        
+        
+        stage ('Publish dist') {
+            sh 'cd target && tar -cvzf ../asciidoctor-idgen.tar.gz . && cd ..'
+            def uploadSpec = """{
+                "files": [
+                    {
+                        "pattern": "asciidoctor-idgen.tar.gz",
+                        "target": "asciidoctor-idgen/${currentBuild.number}/"
+                    }
+                ]
+            }"""
+            buildInfo = server.upload spec: uploadSpec
+            buildInfo.env.capture = true
+            server.publishBuildInfo buildInfo
         }
     } finally {
         deleteDir() /* clean up our workspace */
