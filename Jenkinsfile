@@ -1,5 +1,4 @@
 node {
-    try {
         def server = Artifactory.server 'ART'
         def rtMaven = Artifactory.newMavenBuild()
         def buildInfo
@@ -72,7 +71,4 @@ node {
             buildInfo.env.capture = true
             server.publishBuildInfo buildInfo
         }
-    } finally {
-        deleteDir() /* clean up our workspace */
-    }
 }
