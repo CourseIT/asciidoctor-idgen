@@ -53,15 +53,9 @@ node {
             }
         }
 
-        try {
             stage ('Exec Maven') {
                 rtMaven.run pom: 'pom.xml', goals: 'clean install', buildInfo: buildInfo
             }
-        } finally {
-            junit '**/surefire-reports/**/*.xml'
-           // step( [ $class: 'JacocoPublisher', execPattern: 'target/jacoco.exec' ] )
-           // checkstyle pattern: 'target/checkstyle-result.xml'
-        }
         
         
         stage ('Publish dist') {
