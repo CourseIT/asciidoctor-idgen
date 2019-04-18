@@ -30,12 +30,6 @@ node {
 
         stage ('Artifactory configuration') {
             rtMaven.tool = 'M3'
-            rtMaven.deployer releaseRepo: 'libs-release-local', server: server
-            rtMaven.resolver releaseRepo: 'libs-release', snapshotRepo: 'libs-snapshot', server: server
-
-            if (!isRelease) {
-                rtMaven.deployer.deployArtifacts = false
-            }
 
             buildInfo = Artifactory.newBuildInfo()
             buildInfo.env.capture = true
