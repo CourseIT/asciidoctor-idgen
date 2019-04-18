@@ -1,11 +1,6 @@
 node {
 
-    tools {
-        maven 'Maven 3.3.9'
-        jdk 'jdk8'
-    }
-
-    if (!(env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith('PR'))){
+   if (!(env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith('PR'))){
         echo 'Not a PR or main branch. Skip build.'
         currentBuild.result = 'SUCCESS'
         return
