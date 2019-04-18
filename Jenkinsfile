@@ -9,6 +9,7 @@ node {
     def server = Artifactory.server 'ART'
     def buildInfo
     def warnings
+    def rtMaven = Artifactory.newMavenBuild()
     
     stage ('Clone') {
         checkout scm
