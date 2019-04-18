@@ -16,7 +16,7 @@ node {
 
     if (env.BRANCH_NAME == 'master') {
         stage('Build'){
-          rtMaven.run pom: 'pom.xml', goals: 'clean install', buildInfo: buildInfo
+          rtMaven.run pom: 'pom.xml', goals: 'clean install'
         }
 
         stage ('Publish dist') {
