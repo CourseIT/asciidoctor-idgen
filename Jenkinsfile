@@ -16,7 +16,7 @@ node {
 
     if (env.BRANCH_NAME == 'master') {
         stage('Build'){
-            sh 'mvn -Dmaven.test.failure.ignore=true install'
+          rtMaven.run pom: 'pom.xml', goals: 'clean install', buildInfo: buildInfo
         }
 
         stage ('Publish dist') {
