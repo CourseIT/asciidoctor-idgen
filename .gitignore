@@ -27,3 +27,6 @@ hs_err_pid*
 target/
 *.iml
 .idea/
+ghpages
+.github
+test-cases

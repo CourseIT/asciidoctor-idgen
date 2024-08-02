@@ -1,12 +1,13 @@
 package ru.curs.asciidoctor_idgen;
 
 import org.asciidoctor.Asciidoctor;
+import org.asciidoctor.Options;
 import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.ast.*;
-import org.asciidoctor.ast.impl.BlockImpl;
-import org.asciidoctor.ast.impl.DescriptionListImpl;
-import org.asciidoctor.ast.impl.ListImpl;
-import org.asciidoctor.ast.impl.TableImpl;
+import org.asciidoctor.jruby.ast.impl.BlockImpl;
+import org.asciidoctor.jruby.ast.impl.DescriptionListImpl;
+import org.asciidoctor.jruby.ast.impl.ListImpl;
+import org.asciidoctor.jruby.ast.impl.TableImpl;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -293,12 +294,11 @@ class Lurker {
 
             if (style.toString().equals("asciidoc")) {
                 Asciidoctor asciidoctor = Asciidoctor.Factory.create();
-                Map<String, Object> options = OptionsBuilder.options()
-                        .option("sourcemap", "true")
-                        .option("catalog_assets", "true")
-                        .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 4)
-                        .asMap();
-
+                Options options = Options.builder()
+                        .sourcemap(true)
+                        .catalogAssets(true)
+                        .build();
+                // deleted .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 4)
                 Document document = asciidoctor.load(cell.getSource(), options);
                 touch(document, true);
             }
@@ -326,12 +326,12 @@ class Lurker {
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("table-caption", "Таблица");
 
-        Map<String, Object> options = OptionsBuilder.options()
-                .option("sourcemap", "true")
-                .option("catalog_assets", "true")
-                .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 4)
-                .option("attributes", attributes)
-                .asMap();
+        Options options = Options.builder()
+                .sourcemap(true)
+                .catalogAssets(true)
+                .attributes(attributes)
+                .build();
+        // deleted .option(Asciidoctor.STRUCTURE_MAX_LEVEL, 4)
 
         Document document = asciidoctor.loadFile(new File(path), options);
         touch(document, false);

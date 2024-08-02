@@ -152,6 +152,8 @@ class Extender {
     }
 
     private void addNestedId(int all_block_idx, ExtendedBlock extendedBlock) {
+        // NMP
+        if (extendedBlock.sourceText == null) return;
 
         if (!(extendedBlock.sourceText.equals(""))) {
             String beginText = extendedBlock.sourceText.split("\\r?\\n")[0];
