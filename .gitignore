@@ -13,6 +13,7 @@
 
 # Package Files #
 *.jar
+!old-jar/asciidoctor-idgen-jar-with-dependencies.jar
 *.war
 *.nar
 *.ear
