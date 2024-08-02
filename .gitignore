@@ -28,5 +28,4 @@ target/
 *.iml
 .idea/
 ghpages
-.github
 test-cases
