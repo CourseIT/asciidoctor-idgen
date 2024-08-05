@@ -8,3 +8,15 @@ Parse .adoc files and generate ids
 
 [Old jar](https://github.com/CourseIT/asciidoctor-idgen/blob/master/old-jar/asciidoctor-idgen-jar-with-dependencies.jar)
 
+To build image: 
+
+```
+docker build . -t curs/asciidoctor-idgen
+```
+
+To run image:
+
+```
+docker run --rm -w /doc/[workdir] -v $PWD:/doc curs/asciidoctor-idgen idgen [params] 
+```
+
