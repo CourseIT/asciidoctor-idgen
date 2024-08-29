@@ -28,7 +28,7 @@ class ApprovalTest {
         Extender extender = new Extender(adocFilePath, outFilePath, jsonFilePath, allBlocks);
         extender.extend();
         File adocFile = new File(outFilePath);
-        NamerFactory.setAdditionalInformation("adoc");
+        NamerFactory.setAdditionalInformation(adocCase);
         Approvals.verify(
                 FileUtils.readFile(adocFile)
                         .replaceAll("[a-z0-9]{6}]]", "FFFFFF]]")
