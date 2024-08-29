@@ -196,6 +196,7 @@ class Lurker {
         extendedBlock.isEmbeddedDoc = Boolean.parseBoolean(listParams.get("isEmbeddedDoc").toString());
         if (listItem.getSourceLocation() != null) {
             extendedBlock.sourceLine = listItem.getSourceLocation().getLineNumber();
+            extendedBlock.marker = listItem.getMarker();
         } else {
             extendedBlock.marker = listItem.getMarker();
         }
