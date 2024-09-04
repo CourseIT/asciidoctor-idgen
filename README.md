@@ -26,3 +26,4 @@ To run image as a serve :
 docker run --rm -w /doc/[workdir] -v $PWD:/doc curs/asciidoctor-idgen serveidgen 
 ```
 
+Access service via `/api/enrich` path.
