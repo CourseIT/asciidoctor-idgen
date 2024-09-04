@@ -1,0 +1,2 @@
+#!/bin/sh
+java -jar /asciidoctor-idgen.jar
