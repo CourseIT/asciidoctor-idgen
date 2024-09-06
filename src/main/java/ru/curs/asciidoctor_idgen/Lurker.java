@@ -2,7 +2,6 @@ package ru.curs.asciidoctor_idgen;
 
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.Options;
-import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.ast.*;
 import org.asciidoctor.jruby.ast.impl.BlockImpl;
 import org.asciidoctor.jruby.ast.impl.DescriptionListImpl;
