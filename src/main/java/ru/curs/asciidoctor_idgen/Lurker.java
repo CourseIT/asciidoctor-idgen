@@ -52,7 +52,8 @@ class Lurker {
 
         identify(extendedBlock);
         extendedBlock.isEmbeddedDoc = isEmbeddedDoc;
-        extendedBlock.style = (String) DefaultValueHandler.getValueOrDefault(block.getAttributes().get("style"), "");
+        Object style = block.getAttributes().get("style");
+        extendedBlock.style = DefaultValueHandler.getValueOrDefault(style == null ? null : style.toString(), "");
 
         if (block.getSourceLocation() != null) {
             extendedBlock.sourceLine = block.getSourceLocation().getLineNumber();
