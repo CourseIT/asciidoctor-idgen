@@ -34,28 +34,33 @@ public class Main {
         }
     }
 
-    public static String enrich(String adocFilePath, String outFilePath
+    public static OutputLog enrich(String adocFilePath, String outFilePath
             , String jsonFilePath, @Nullable Boolean outputHtml) throws IOException {
-        var logOutputString = "";
+        OutputLog outputLog = new OutputLog();
         Lurker lurker = new Lurker(adocFilePath);
         ArrayList<ExtendedBlock> allBlocks = lurker.lurk();
 
-        System.out.printf("Parsed successfully. All blocks: %d%n", allBlocks.size());
-        logOutputString += String.format("Parsed successfully. All blocks: %d%n\n", allBlocks.size());
+        System.out.printf("Parsed successfully. All blocks: %d", allBlocks.size());
+        outputLog.add("INFO"
+                , String.format(
+                        "Parsed successfully. All blocks: %d"
+                        , allBlocks.size()
+                )
+        );
 
         Extender extender = new Extender(adocFilePath, outFilePath, jsonFilePath, allBlocks);
         extender.extend();
 
         System.out.println("Identified successfully.");
-        logOutputString += "Identified successfully.\n";
+        outputLog.add("INFO", "Identified successfully.");
 
         if (outputHtml) {
             Converter converter = new Converter(outFilePath);
-            logOutputString += converter.convert();
-            logOutputString += "Converted successfully.\n";
+            outputLog.add(converter.convert());
+            outputLog.add("INFO", "Converted successfully.");
             System.out.println("Converted successfully.");
 
         }
-        return logOutputString;
+        return outputLog;
     }
 }

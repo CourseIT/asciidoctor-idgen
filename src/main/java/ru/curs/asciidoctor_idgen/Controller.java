@@ -21,9 +21,9 @@ public class Controller {
             return new ResponseEntity<>("No output provided", HttpStatus.CONFLICT);
         if (enrichParams.getJson() == null)
             return new ResponseEntity<>("No json provided", HttpStatus.CONFLICT);
-        var logOutputString = Main.enrich(enrichParams.getInput(), enrichParams.getOutput()
+        var outputLog = Main.enrich(enrichParams.getInput(), enrichParams.getOutput()
                 , enrichParams.getJson(), enrichParams.getOhtml() != null);
-        return new ResponseEntity<>(logOutputString, HttpStatus.OK);
+        return new ResponseEntity<>(outputLog, HttpStatus.OK);
     }
 
 }

@@ -1,0 +1,13 @@
+<div id="content">
+ <div id="paragraph_FFFFFF" class="paragraph">
+  <p>Some paragraph</p>
+ </div>
+ <div class="ulist">
+  <ul>
+   <li id="list_item_FFFFFF">
+    <p><a id="anchor_list_item_FFFFFF"></a>item 1</p></li>
+   <li id="list_item_FFFFFF">
+    <p><a id="anchor_list_item_FFFFFF"></a>item 2</p></li>
+  </ul>
+ </div>
+</div>
