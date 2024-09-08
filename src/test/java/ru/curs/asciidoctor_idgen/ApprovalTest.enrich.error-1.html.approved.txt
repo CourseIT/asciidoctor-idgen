@@ -1,0 +1,8 @@
+<div id="content">
+ <div id="paragraph_FFFFFF" class="paragraph">
+  <p>Some paragraph</p>
+ </div>
+ <div id="paragraph_FFFFFF" class="paragraph">
+  <p>Unresolved directive in error-1-out.adoc - include::smth-not-existing[]</p>
+ </div>
+</div>

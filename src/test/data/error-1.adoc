@@ -1,0 +1,3 @@
+Some paragraph
+
+include::smth-not-existing[]
