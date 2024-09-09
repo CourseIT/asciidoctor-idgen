@@ -7,7 +7,7 @@
     <groupId>ru.curs.asciidoctor_idgen</groupId>
     <artifactId>asciidoctor-idgen</artifactId>
     <packaging>jar</packaging>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <name>asciidoctor-idgen</name>
 
     <properties>

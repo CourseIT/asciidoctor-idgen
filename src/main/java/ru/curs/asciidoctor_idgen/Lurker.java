@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
 
 class Lurker {
-    private static ArrayList<ExtendedBlock> allBlocks = new ArrayList<>();
+    private ArrayList<ExtendedBlock> allBlocks = new ArrayList<>();
     private String path;
 
     Lurker(String path) {

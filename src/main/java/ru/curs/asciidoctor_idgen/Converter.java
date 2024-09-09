@@ -33,7 +33,7 @@ class Converter {
         this.adocFilePath = adocFilePath;
     }
 
-    OutputLog convert() throws FileNotFoundException {
+    OutputLog convert() {
         final OutputLog outputLog = new OutputLog();
         Asciidoctor asciidoctor = Asciidoctor.Factory.create();
         asciidoctor.registerLogHandler(logRecord -> {
