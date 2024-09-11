@@ -83,7 +83,10 @@ class Extender {
                     addNestedId(all_block_idx, extendedBlock);
 
                 } else if (extendedBlock.context.contains("list_item")) {
-
+//                    if (extendedBlock.sourceLine == 8567) {
+//                        System.out.println(extendedBlock.sourceLine);
+//                        System.out.println(extendedBlock.sourceText);
+//                    }
                     addNestedId(all_block_idx, extendedBlock);
                 }
             }
@@ -160,7 +163,11 @@ class Extender {
             ExtendedBlock parentBlock = getParentBlock(extendedBlock);
             ExtendedBlock prevIdentifiedBlock = getPrevIdentifiedBlock(all_block_idx, extendedBlock);
 
-            for (int line_idx = prevIdentifiedBlock.sourceLine + shift; line_idx < this.lines.size(); line_idx++) {
+            for (int line_idx = extendedBlock.previousSourceLine + shift;
+                 line_idx < (extendedBlock.nextSourceLine != 0 ?
+                         extendedBlock.nextSourceLine +
+                                 shift : lines.size());
+                 line_idx++) {
                 String line = this.lines.get(line_idx).trim();
 
                 if (extendedBlock.context.contains("list_item")) {

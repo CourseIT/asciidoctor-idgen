@@ -8,6 +8,8 @@ class ExtendedBlock {
     Boolean isEmbeddedDoc; //находится в документе, встроенном в исходный (asciidoc-ячейка)
     String context; // тип элемента: раздел, абзац, список и т.д.
     int sourceLine; //строка, на которой находится элемент в исходном документе
+    int previousSourceLine;
+    int nextSourceLine;
     String sourceText; // текстовое содержимое элемента из исходного документа (asciidoc)
     String htmlText; // содержимое элемента, конвертированное в html
     String term; // Термин
