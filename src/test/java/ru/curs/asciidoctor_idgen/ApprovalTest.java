@@ -16,7 +16,11 @@ import java.nio.file.Paths;
 class ApprovalTest {
 
     @ParameterizedTest
-    @CsvSource({"list-1","error-1"})
+    @CsvSource({
+            "list-1",
+            "error-1",
+            "list-2",
+    })
     void enrich(String adocCase) throws IOException {
         Path tmpdir = Files.createTempDirectory(Paths.get("target"), "approve");
         String adocFilePath = "src/test/data/%s.adoc".formatted(adocCase);

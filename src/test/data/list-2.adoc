@@ -1,0 +1,16 @@
+* Complex list item
++
+Paragraph 1
+with continuation
++
+Paragraph 2
+
+Paragraph 3
+
+. Some another list
+** Some another list item
+
+[start = 1]
+. Some another list
+[none]
+** Some another list item

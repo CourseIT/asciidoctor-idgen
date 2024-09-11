@@ -1,0 +1,41 @@
+<div id="content">
+ <div class="ulist">
+  <ul>
+   <li id="list_item_FFFFFF">
+    <p><a id="anchor_list_item_FFFFFF"></a>Complex list item</p>
+    <div id="paragraph_FFFFFF" class="paragraph">
+     <p>Paragraph 1 with continuation</p>
+    </div>
+    <div id="paragraph_FFFFFF" class="paragraph">
+     <p>Paragraph 2</p>
+    </div></li>
+  </ul>
+ </div>
+ <div id="paragraph_FFFFFF" class="paragraph">
+  <p>Paragraph 3</p>
+ </div>
+ <div class="olist arabic">
+  <ol class="arabic">
+   <li id="list_item_FFFFFF">
+    <p><a id="anchor_list_item_FFFFFF"></a>Some another list</p>
+    <div class="ulist">
+     <ul>
+      <li id="list_item_FFFFFF">
+       <p><a id="anchor_list_item_FFFFFF"></a>Some another list item</p></li>
+     </ul>
+    </div></li>
+  </ol>
+ </div>
+ <div class="olist arabic">
+  <ol class="arabic" start="1">
+   <li id="list_item_FFFFFF">
+    <p><a id="anchor_list_item_FFFFFF"></a>Some another list</p>
+    <div class="ulist none">
+     <ul class="none">
+      <li id="list_item_FFFFFF">
+       <p><a id="anchor_list_item_FFFFFF"></a>Some another list item</p></li>
+     </ul>
+    </div></li>
+  </ol>
+ </div>
+</div>

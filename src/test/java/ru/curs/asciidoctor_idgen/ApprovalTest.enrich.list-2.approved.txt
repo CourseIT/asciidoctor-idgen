@@ -1,0 +1,19 @@
+* [[list_item_FFFFFF]]Complex list item
++
+[[paragraph_FFFFFF]]
+Paragraph 1
+with continuation
++
+[[paragraph_FFFFFF]]
+Paragraph 2
+
+[[paragraph_FFFFFF]]
+Paragraph 3
+
+. [[list_item_FFFFFF]]Some another list
+** [[list_item_FFFFFF]]Some another list item
+
+[start = 1]
+. [[list_item_FFFFFF]]Some another list
+[none]
+** [[list_item_FFFFFF]]Some another list item

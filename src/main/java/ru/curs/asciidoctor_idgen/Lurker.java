@@ -7,11 +7,10 @@ import org.asciidoctor.jruby.ast.impl.BlockImpl;
 import org.asciidoctor.jruby.ast.impl.DescriptionListImpl;
 import org.asciidoctor.jruby.ast.impl.ListImpl;
 import org.asciidoctor.jruby.ast.impl.TableImpl;
+import org.springframework.javapoet.ClassName;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -189,9 +188,13 @@ class Lurker {
         ExtendedBlock extendedBlock = new ExtendedBlock();
 
         extendedBlock.context = listItem.getContext();
+//        System.out.println(1111);
+//        System.out.println(listItem.getSource());
+//        System.out.println(getInlineId(listItem.getSource(), listParams));
         extendedBlock.id = getInlineId(listItem.getSource(), listParams);
 
         identify(extendedBlock);
+//        System.out.println(extendedBlock.id);
         extendedBlock.parentId = listParams.get("id").toString();
         extendedBlock.isEmbeddedDoc = Boolean.parseBoolean(listParams.get("isEmbeddedDoc").toString());
         if (listItem.getSourceLocation() != null) {
@@ -336,6 +339,30 @@ class Lurker {
 
         Document document = asciidoctor.loadFile(new File(path), options);
         touch(document, false);
+        allBlocks.sort(Comparator.comparingInt(lhs -> lhs.sourceLine));
+        var processedSourceLines = new HashSet<Integer>();
+        var i = 0;
+        while (i < allBlocks.size()) {
+            if (allBlocks.get(i).sourceText == null) {
+                allBlocks.remove(i);
+            } else if (allBlocks.get(i).sourceText.trim().isEmpty()) {
+                allBlocks.remove(i);
+            } else if (processedSourceLines.contains(allBlocks.get(i).sourceLine)) {
+                allBlocks.remove(i);
+            } else {
+                processedSourceLines.add(allBlocks.get(i).sourceLine);
+                i++;
+            }
+        }
+        i = 0;
+        while (i < allBlocks.size()) {
+            if (i != 0) {
+                allBlocks.get(i).previousSourceLine = allBlocks.get(i - 1).sourceLine;
+            } else if (i != allBlocks.size() - 1) {
+                allBlocks.get(i).nextSourceLine = allBlocks.get(i + 1).sourceLine;
+            }
+            i++;
+        }
 
         return allBlocks;
     }
