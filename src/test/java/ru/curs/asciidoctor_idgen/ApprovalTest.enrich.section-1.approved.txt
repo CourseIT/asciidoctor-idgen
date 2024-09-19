@@ -1,0 +1,7 @@
+= Asciidoc
+
+[[section_FFFFFF]]
+== Some section
+
+[[paragraph_FFFFFF]]
+Some paragraph

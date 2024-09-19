@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,20 +51,10 @@ class Extender {
         int all_block_idx = 0;
         for (ExtendedBlock extendedBlock : allBlocks) {
             if (!extendedBlock.isIdentified && !extendedBlock.isEmbeddedDoc) {
-                if (extendedBlock.context.equals("paragraph")
-//                        || extendedBlock.context.endsWith("list") && !extendedBlock.style.equals("bibliography")
+                if (extendedBlock.context.equals("paragraph") || extendedBlock.context.equals("section")
                 ) {
                     int paragraphAnchorLineIdx = extendedBlock.sourceLine + shift - 1;
-//                    String paragraphAnchorLine = "";
-//                    if (paragraphAnchorLineIdx <= this.lines.size() - 1) {
-//                        paragraphAnchorLine = this.lines.get(paragraphAnchorLineIdx).trim();
-//                    }
-
-//                    if (!(extendedBlock.sourceText.startsWith(paragraphAnchorLine)) || paragraphAnchorLine.isEmpty()) {
-
                     paragraphAnchorLineIdx = fixParagraphAnchorLineIdx(all_block_idx, extendedBlock, paragraphAnchorLineIdx, shift);
-//                    }
-
                     try {
                         this.lines.add(paragraphAnchorLineIdx, "[[" + extendedBlock.id + "]]");
                         shift += 1;
@@ -134,7 +125,11 @@ class Extender {
 
         for (int line_idx = prevIdentifiedBlock.sourceLine + shift; line_idx < this.lines.size(); line_idx++) {
             String line = this.lines.get(line_idx).trim();
-            if (!(line.isEmpty()) && extendedBlock.sourceText.startsWith(line)) {
+            var sourceText  = extendedBlock.sourceText;
+            if (Objects.equals(extendedBlock.context, "section")) {
+                sourceText = extendedBlock.title;
+            }
+            if (!(line.isEmpty()) && sourceText.startsWith(line)) {
                 newParagraphAnchorLineIdx = line_idx;
                 extendedBlock.sourceLine = line_idx - shift + 1;
                 break;
