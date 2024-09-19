@@ -1,5 +1,0 @@
-[[paragraph_FFFFFF]]
-Some paragraph
-
-[[paragraph_FFFFFF]]
-include::smth-not-existing[]
