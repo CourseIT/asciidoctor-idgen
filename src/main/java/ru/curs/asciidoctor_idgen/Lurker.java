@@ -29,7 +29,6 @@ class Lurker {
 
         if (!(block.getContext().equals("document") ||
                 block.getContext().equals("preamble"))) {
-
             addBlock(block, isEmbeddedDoc);
         }
 
@@ -218,7 +217,7 @@ class Lurker {
     }
 
     private void identify(ExtendedBlock extendedBlock) {
-        if (extendedBlock.id != null) {
+        if (extendedBlock.id != null && extendedBlock.id.startsWith(extendedBlock.context)) {
             extendedBlock.isIdentified = true;
         } else {
             IdGenerator idGenerator = new IdGenerator();
@@ -343,9 +342,9 @@ class Lurker {
         var processedSourceLines = new HashSet<Integer>();
         var i = 0;
         while (i < allBlocks.size()) {
-            if (allBlocks.get(i).sourceText == null) {
+            if (allBlocks.get(i).sourceText == null && allBlocks.get(i).title == null) {
                 allBlocks.remove(i);
-            } else if (allBlocks.get(i).sourceText.trim().isEmpty()) {
+            } else if (allBlocks.get(i).sourceText != null && allBlocks.get(i).sourceText.trim().isEmpty()) {
                 allBlocks.remove(i);
             } else if (processedSourceLines.contains(allBlocks.get(i).sourceLine)) {
                 allBlocks.remove(i);
