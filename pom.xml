@@ -7,7 +7,7 @@
     <groupId>ru.curs.asciidoctor_idgen</groupId>
     <artifactId>asciidoctor-idgen</artifactId>
     <packaging>jar</packaging>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <name>asciidoctor-idgen</name>
 
     <properties>
@@ -18,7 +18,7 @@
         <dependency>
             <groupId>org.asciidoctor</groupId>
             <artifactId>asciidoctorj</artifactId>
-            <version>2.5.13</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>

@@ -1,6 +1,7 @@
 package ru.curs.asciidoctor_idgen;
 
 import org.asciidoctor.Asciidoctor;
+import org.asciidoctor.Options;
 import org.asciidoctor.SafeMode;
 import org.asciidoctor.log.LogHandler;
 import org.asciidoctor.log.LogRecord;
@@ -15,7 +16,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static org.asciidoctor.OptionsBuilder.options;
 
 class Converter {
     private String adocFilePath;
@@ -43,8 +43,7 @@ class Converter {
             outputLog.add(logRecord.getSeverity().name(), logRecord.getMessage());
         });
 
-        Map<String, Object> options = options().safe(SafeMode.UNSAFE)
-                .asMap();
+        var options = Options.builder().safe(SafeMode.UNSAFE).build();
 
         asciidoctor.convertFile(new File(this.adocFilePath), options);
         var outputHtmlPath = String.format("%s.html", removeFileExtension(this.adocFilePath, false));

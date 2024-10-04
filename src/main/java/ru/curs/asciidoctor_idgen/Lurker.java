@@ -1,6 +1,7 @@
 package ru.curs.asciidoctor_idgen;
 
 import org.asciidoctor.Asciidoctor;
+import org.asciidoctor.Attributes;
 import org.asciidoctor.Options;
 import org.asciidoctor.ast.*;
 import org.asciidoctor.jruby.ast.impl.BlockImpl;
@@ -217,7 +218,7 @@ class Lurker {
     }
 
     private void identify(ExtendedBlock extendedBlock) {
-        if (extendedBlock.id != null && extendedBlock.id.startsWith(extendedBlock.context)) {
+        if (extendedBlock.id != null ) {
             extendedBlock.isIdentified = true;
         } else {
             IdGenerator idGenerator = new IdGenerator();
@@ -326,8 +327,10 @@ class Lurker {
 
         Asciidoctor asciidoctor = Asciidoctor.Factory.create();
 
-        Map<String, Object> attributes = new HashMap<>();
-        attributes.put("table-caption", "Таблица");
+        var attributes = Attributes.builder()
+                .attribute("table-caption", "Таблица")
+                .attribute("!sectids")
+                .build();
 
         Options options = Options.builder()
                 .sourcemap(true)

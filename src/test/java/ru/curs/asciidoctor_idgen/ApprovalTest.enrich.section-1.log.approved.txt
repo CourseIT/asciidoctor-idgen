@@ -1,3 +1,0 @@
-INFO,Parsed successfully. All blocks: 2
-INFO,Identified successfully.
-INFO,Converted successfully.
