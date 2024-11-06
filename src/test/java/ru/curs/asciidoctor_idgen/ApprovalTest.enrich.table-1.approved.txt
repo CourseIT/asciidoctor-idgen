@@ -1,0 +1,6 @@
+[[table_FFFFFF]]
+[cols=""]
+|===
+|
+Some text
+|===

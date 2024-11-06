@@ -41,6 +41,7 @@ public class Main {
         ArrayList<ExtendedBlock> allBlocks = lurker.lurk();
 
         System.out.printf("Parsed successfully. All blocks: %d", allBlocks.size());
+        System.out.println();
         outputLog.add("INFO"
                 , String.format(
                         "Parsed successfully. All blocks: %d"

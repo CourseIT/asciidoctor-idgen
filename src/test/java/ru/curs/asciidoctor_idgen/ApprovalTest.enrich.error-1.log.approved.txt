@@ -1,4 +1,5 @@
 INFO,Parsed successfully. All blocks: 2
 INFO,Identified successfully.
 ERROR,include file not found: /home/nmp/work/med/repo/asciidoctor-idgen/target/approve/smth-not-existing
+Info,Converted to html successfuuly
 INFO,Converted successfully.
