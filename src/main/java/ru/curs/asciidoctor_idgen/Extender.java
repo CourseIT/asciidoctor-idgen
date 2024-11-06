@@ -18,7 +18,8 @@ class Extender {
     private String jsonFilePath;
     private String copyPath;
     private ArrayList<ExtendedBlock> allBlocks;
-    private List<String> lines; //список строк файла
+
+    private ArrayList<String> lines; //список строк файла
     private int shift = 0; //количество новых строк, которое было вставлено в документ, относительно исходного
 
     Extender(String path, String outPath, String jsonFilePath, ArrayList<ExtendedBlock> allBlocks) throws IOException {
@@ -125,11 +126,14 @@ class Extender {
 
         for (int line_idx = prevIdentifiedBlock.sourceLine + shift; line_idx < this.lines.size(); line_idx++) {
             String line = this.lines.get(line_idx).trim();
-            var sourceText  = extendedBlock.sourceText;
+            var sourceText = extendedBlock.sourceText;
             if (Objects.equals(extendedBlock.context, "section")) {
                 sourceText = extendedBlock.title;
             }
-            if (!(line.isEmpty()) && sourceText.startsWith(line)) {
+            var lineToCompare = line;
+            if (Objects.equals(extendedBlock.context, "section") && !(line.isEmpty()))
+                lineToCompare = line.replaceFirst("^[=]+[ ]", "");
+            if (!(line.isEmpty()) && sourceText.startsWith(lineToCompare)) {
                 newParagraphAnchorLineIdx = line_idx;
                 extendedBlock.sourceLine = line_idx - shift + 1;
                 break;
@@ -161,7 +165,7 @@ class Extender {
             for (int line_idx = extendedBlock.previousSourceLine + shift;
                  line_idx < (extendedBlock.nextSourceLine != 0 ?
                          extendedBlock.nextSourceLine +
-                                 shift : lines.size());
+                         shift : lines.size());
                  line_idx++) {
                 String line = this.lines.get(line_idx).trim();
 

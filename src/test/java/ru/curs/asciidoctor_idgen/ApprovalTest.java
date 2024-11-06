@@ -22,6 +22,7 @@ class ApprovalTest {
             "error-1, log",
             "list-2, adoc",
             "section-1, adoc",
+            "table-1, adoc",
     })
     void enrich(String adocCase, String type) throws Exception {
         Path tmpdir = Files.createTempDirectory(Paths.get("target"), "approve");
