@@ -70,8 +70,8 @@ class Converter {
         } catch (IOException e) {
             throw new RuntimeException("Output Html not found", e);
         }
-        System.out.println("Converted to html successfuuly");
-        outputLog.add("Info", "Converted to html successfuuly");
+        System.out.println("Converted to html successfully");
+        outputLog.add("INFO", "Converted to html successfully");
         jsoup.selectXpath("//li").forEach(listItem ->
                 {
                     var descendant = new ArrayList<Node>();
