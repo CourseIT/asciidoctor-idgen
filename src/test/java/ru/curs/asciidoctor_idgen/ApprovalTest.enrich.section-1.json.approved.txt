@@ -1,0 +1,28 @@
+[
+  {
+    "docTitle": "Asciidoc",
+    "isIdentified": true,
+    "id": "section_FFFFFF",
+    "isEmbeddedDoc": false,
+    "context": "section",
+    "sourceLine": 3,
+    "previousSourceLine": 0,
+    "nextSourceLine": 5,
+    "title": "Some section",
+    "style": "",
+    "level": 1
+  },
+  {
+    "docTitle": "Asciidoc",
+    "isIdentified": true,
+    "id": "paragraph_FFFFFF",
+    "isEmbeddedDoc": false,
+    "context": "paragraph",
+    "sourceLine": 5,
+    "previousSourceLine": 3,
+    "nextSourceLine": 0,
+    "sourceText": "Some paragraph",
+    "htmlText": "Some paragraph",
+    "style": ""
+  }
+]

@@ -6,6 +6,7 @@ import org.approvaltests.namer.NamerFactory;
 import org.jsoup.Jsoup;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,6 +23,7 @@ class ApprovalTest {
             "error-1, log",
             "list-2, adoc",
             "section-1, adoc",
+            "section-1, json",
             "table-1, adoc",
     })
     void enrich(String adocCase, String type) throws Exception {
@@ -47,6 +49,12 @@ class ApprovalTest {
         } else if ("log".equals(type)) {
             NamerFactory.setAdditionalInformation(adocCase + ".log");
             Approvals.verify(log.toString().replaceAll("approve[0-9]+", "approve"));
-        } else throw new Exception("Can't recoginze test type");
+        } else if ("json".equals(type)) {
+            NamerFactory.setAdditionalInformation(adocCase + ".json");
+            Approvals.verify(
+                    FileUtils.readFile(new File(jsonFilePath))
+                            .replaceAll("_[a-z0-9]{6}\"", "_FFFFFF\"")
+            );
+        } else throw new Exception("Can't recognize test type");
     }
 }

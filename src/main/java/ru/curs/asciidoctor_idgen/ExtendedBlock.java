@@ -18,6 +18,7 @@ class ExtendedBlock {
     String title; // заголовок
     String target; // ссылка на изображение (для img)
     String style;
+    Integer level;
 
     ExtendedBlock() {
         isIdentified = false;
