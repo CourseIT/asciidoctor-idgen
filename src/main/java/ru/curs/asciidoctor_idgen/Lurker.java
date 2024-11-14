@@ -70,6 +70,7 @@ class Lurker {
                 break;
             case "section":
                 extendedBlock.title = block.getTitle();
+                extendedBlock.level = block.getLevel();
 
                 break;
             case "table":
