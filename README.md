@@ -20,7 +20,7 @@ To run image:
 docker run --rm -w /doc/[workdir] -v $PWD:/doc curs/asciidoctor-idgen idgen [params] 
 ```
 
-To run image as a serve :
+To run image as a server:
 
 ```
 docker run --rm -w /doc/[workdir] -v $PWD:/doc curs/asciidoctor-idgen serveidgen 

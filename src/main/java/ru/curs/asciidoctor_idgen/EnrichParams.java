@@ -5,6 +5,7 @@ public class EnrichParams {
     private String output;
     private String json;
     private Boolean ohtml;
+    private Boolean sni;
 
     public String getInput() {
         return input;
@@ -20,5 +21,9 @@ public class EnrichParams {
 
     public Boolean getOhtml() {
         return ohtml;
+    }
+
+    public Boolean getSectionNaturalIds() {
+        return sni;
     }
 }

@@ -18,15 +18,18 @@ class Extender {
     private String jsonFilePath;
     private String copyPath;
     private ArrayList<ExtendedBlock> allBlocks;
+    private Boolean sectionNaturalIds;
 
     private ArrayList<String> lines; //список строк файла
     private int shift = 0; //количество новых строк, которое было вставлено в документ, относительно исходного
 
-    Extender(String path, String outPath, String jsonFilePath, ArrayList<ExtendedBlock> allBlocks) throws IOException {
+    Extender(String path, String outPath, String jsonFilePath,
+             ArrayList<ExtendedBlock> allBlocks, Boolean sectionNaturalIds) throws IOException {
         this.outPath = outPath;
         this.jsonFilePath = jsonFilePath;
 
         this.allBlocks = allBlocks;
+        this.sectionNaturalIds = sectionNaturalIds;
 
         this.lines = new ArrayList<>();
 

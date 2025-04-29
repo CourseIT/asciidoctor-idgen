@@ -1,0 +1,7 @@
+= Asciidoc
+
+[[_some_section_with_natural_id]]
+== Some section with natural id
+
+[[paragraph_FFFFFF]]
+Some paragraph
