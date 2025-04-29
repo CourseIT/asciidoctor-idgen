@@ -11,19 +11,21 @@ import java.io.IOException;
 @RequestMapping("/api")
 public class Controller {
 
-    @PostMapping("/enrich")
-    public ResponseEntity<Object> enrich(
-            @RequestBody EnrichParams enrichParams
-    ) throws IOException {
-        if (enrichParams.getInput() == null)
-            return new ResponseEntity<>("No input provided", HttpStatus.CONFLICT);
-        if (enrichParams.getOutput() == null)
-            return new ResponseEntity<>("No output provided", HttpStatus.CONFLICT);
-        if (enrichParams.getJson() == null)
-            return new ResponseEntity<>("No json provided", HttpStatus.CONFLICT);
-        var outputLog = Main.enrich(enrichParams.getInput(), enrichParams.getOutput()
-                , enrichParams.getJson(), enrichParams.getOhtml() != null);
-        return new ResponseEntity<>(outputLog, HttpStatus.OK);
-    }
+  @PostMapping("/enrich")
+  public ResponseEntity<Object> enrich(
+      @RequestBody EnrichParams enrichParams
+  ) throws IOException {
+    if (enrichParams.getInput() == null)
+      return new ResponseEntity<>("No input provided", HttpStatus.CONFLICT);
+    if (enrichParams.getOutput() == null)
+      return new ResponseEntity<>("No output provided", HttpStatus.CONFLICT);
+    if (enrichParams.getJson() == null)
+      return new ResponseEntity<>("No json provided", HttpStatus.CONFLICT);
+    var outputLog = Main.enrich(enrichParams.getInput(), enrichParams.getOutput()
+        , enrichParams.getJson(), enrichParams.getOhtml() != null
+        , enrichParams.getSectionNaturalIds() != null
+    );
+    return new ResponseEntity<>(outputLog, HttpStatus.OK);
+  }
 
 }

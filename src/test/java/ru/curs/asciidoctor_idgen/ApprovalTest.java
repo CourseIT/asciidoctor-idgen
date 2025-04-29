@@ -16,15 +16,18 @@ class ApprovalTest {
 
     @ParameterizedTest
     @CsvSource({
-            "existing-id-1, adoc",
-            "list-1, adoc",
-            "list-1, html",
-            "list-1, log",
-            "error-1, log",
-            "list-2, adoc",
-            "section-1, adoc",
-            "section-1, json",
-            "table-1, adoc",
+        "existing-id-1, adoc",
+        "list-1, adoc",
+        "list-1, html",
+        "list-1, log",
+        "error-1, log",
+        "list-2, adoc",
+        "section-1, adoc",
+        "section-1, json",
+        "section-2, adoc",
+        "table-1, adoc",
+        "no-anchor-in-id-1, adoc",
+        "no-anchor-in-id-1, html",
     })
     void enrich(String adocCase, String type) throws Exception {
         Path tmpdir = Files.createTempDirectory(Paths.get("target"), "approve");
@@ -32,7 +35,8 @@ class ApprovalTest {
         String outFilePath = "%s/%s-out.adoc".formatted(tmpdir, adocCase);
         String htmlFilePath = "%s/%s-out.html".formatted(tmpdir, adocCase);
         String jsonFilePath = "%s/%s-json.adoc".formatted(tmpdir, adocCase);
-        var log = Main.enrich(adocFilePath, outFilePath, jsonFilePath, true);
+        Boolean sectionNaturalId = adocCase.equals("section-2");
+        var log = Main.enrich(adocFilePath, outFilePath, jsonFilePath, true, sectionNaturalId);
         File adocFile = new File(outFilePath);
         if ("adoc".equals(type)) {
             NamerFactory.setAdditionalInformation(adocCase);

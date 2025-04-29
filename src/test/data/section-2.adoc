@@ -1,0 +1,5 @@
+= Asciidoc
+
+== Some section with natural id
+
+Some paragraph
